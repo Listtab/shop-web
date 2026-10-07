@@ -45,7 +45,7 @@
       "id": "cat_01",
       "name": "500元左右酒",
       "icon": "🍶",
-      "iconImg": "",
+      "iconImg": "images/分类图标/500元左右酒.jpg",
       "onSale": true,
       "sort": 1
     },
@@ -53,7 +53,7 @@
       "id": "cat_02",
       "name": "光瓶品鉴",
       "icon": "🫙",
-      "iconImg": "",
+      "iconImg": "images/分类图标/光瓶品鉴.jpg",
       "onSale": true,
       "sort": 2
     },
@@ -61,7 +61,7 @@
       "id": "cat_03",
       "name": "薄酒",
       "icon": "🥃",
-      "iconImg": "",
+      "iconImg": "images/分类图标/薄酒.jpg",
       "onSale": true,
       "sort": 3
     },
@@ -69,7 +69,7 @@
       "id": "cat_04",
       "name": "牛栏山",
       "icon": "🍺",
-      "iconImg": "",
+      "iconImg": "images/分类图标/牛栏山.jpg",
       "onSale": true,
       "sort": 4
     },
@@ -77,7 +77,7 @@
       "id": "cat_05",
       "name": "生肖系列",
       "icon": "🎁",
-      "iconImg": "",
+      "iconImg": "images/分类图标/生肖系列.jpg",
       "onSale": true,
       "sort": 5
     },
@@ -85,7 +85,7 @@
       "id": "cat_06",
       "name": "千元送礼专区",
       "icon": "🐴",
-      "iconImg": "",
+      "iconImg": "images/分类图标/千元送礼专区.jpg",
       "onSale": true,
       "sort": 6
     },
@@ -93,7 +93,7 @@
       "id": "cat_07",
       "name": "钓鱼台",
       "icon": "🎣",
-      "iconImg": "",
+      "iconImg": "images/分类图标/钓鱼台.jpg",
       "onSale": true,
       "sort": 7
     },
@@ -101,7 +101,7 @@
       "id": "cat_08",
       "name": "彦渡",
       "icon": "🧧",
-      "iconImg": "",
+      "iconImg": "images/分类图标/彦渡.jpg",
       "onSale": true,
       "sort": 8
     },
@@ -109,7 +109,7 @@
       "id": "cat_09",
       "name": "董酒",
       "icon": "🍲",
-      "iconImg": "",
+      "iconImg": "images/分类图标/董酒.jpg",
       "onSale": true,
       "sort": 9
     },
@@ -117,7 +117,7 @@
       "id": "cat_10",
       "name": "国台",
       "icon": "🏮",
-      "iconImg": "",
+      "iconImg": "images/分类图标/国台.jpg",
       "onSale": true,
       "sort": 10
     },
@@ -125,7 +125,7 @@
       "id": "cat_11",
       "name": "酒鬼",
       "icon": "💰",
-      "iconImg": "",
+      "iconImg": "images/分类图标/酒鬼.jpg",
       "onSale": true,
       "sort": 11
     },
@@ -133,7 +133,7 @@
       "id": "cat_12",
       "name": "金沙",
       "icon": "💍",
-      "iconImg": "",
+      "iconImg": "images/分类图标/金沙.jpg",
       "onSale": true,
       "sort": 12
     },
@@ -141,7 +141,7 @@
       "id": "cat_13",
       "name": "西凤",
       "icon": "🧧",
-      "iconImg": "",
+      "iconImg": "images/分类图标/西凤.jpg",
       "onSale": true,
       "sort": 13
     },
@@ -149,7 +149,7 @@
       "id": "cat_14",
       "name": "珍酒",
       "icon": "🌾",
-      "iconImg": "",
+      "iconImg": "images/分类图标/珍酒.jpg",
       "onSale": true,
       "sort": 14
     },
@@ -157,7 +157,7 @@
       "id": "cat_15",
       "name": "郎酒",
       "icon": "🍶",
-      "iconImg": "",
+      "iconImg": "images/分类图标/郎酒.jpg",
       "onSale": true,
       "sort": 15
     },
@@ -165,7 +165,7 @@
       "id": "cat_16",
       "name": "泸州老窖",
       "icon": "🥃",
-      "iconImg": "",
+      "iconImg": "images/分类图标/泸州老窖.jpg",
       "onSale": true,
       "sort": 16
     },
@@ -173,7 +173,7 @@
       "id": "cat_17",
       "name": "大坛酒专区",
       "icon": "💼",
-      "iconImg": "",
+      "iconImg": "images/分类图标/大坛酒专区.jpg",
       "onSale": true,
       "sort": 17
     },
@@ -181,7 +181,7 @@
       "id": "cat_18",
       "name": "小酒及礼盒专区",
       "icon": "🎁",
-      "iconImg": "",
+      "iconImg": "images/分类图标/小酒及礼盒专区.jpg",
       "onSale": true,
       "sort": 18
     },
@@ -189,7 +189,7 @@
       "id": "cat_19",
       "name": "老年份酒专区",
       "icon": "🧧",
-      "iconImg": "",
+      "iconImg": "images/分类图标/老年份酒专区.jpg",
       "onSale": true,
       "sort": 19
     },
@@ -197,7 +197,7 @@
       "id": "cat_20",
       "name": "婚宴用酒专区",
       "icon": "🎊",
-      "iconImg": "",
+      "iconImg": "images/分类图标/婚宴用酒专区.jpg",
       "onSale": true,
       "sort": 20
     },
@@ -205,7 +205,7 @@
       "id": "cat_21",
       "name": "百元口粮酒",
       "icon": "🍚",
-      "iconImg": "",
+      "iconImg": "images/分类图标/百元口粮酒.jpg",
       "onSale": true,
       "sort": 21
     },
@@ -213,7 +213,7 @@
       "id": "cat_22",
       "name": "沱牌舍得",
       "icon": "🪙",
-      "iconImg": "",
+      "iconImg": "images/分类图标/沱牌舍得.jpg",
       "onSale": true,
       "sort": 22
     },
@@ -221,7 +221,7 @@
       "id": "cat_23",
       "name": "汾酒",
       "icon": "🥢",
-      "iconImg": "",
+      "iconImg": "images/分类图标/汾酒.jpg",
       "onSale": true,
       "sort": 23
     },
@@ -229,7 +229,7 @@
       "id": "cat_24",
       "name": "剑南春",
       "icon": "🎂",
-      "iconImg": "",
+      "iconImg": "images/分类图标/剑南春.jpg",
       "onSale": true,
       "sort": 24
     },
@@ -237,7 +237,7 @@
       "id": "cat_25",
       "name": "五粮液",
       "icon": "🍾",
-      "iconImg": "",
+      "iconImg": "images/分类图标/五粮液.jpg",
       "onSale": true,
       "sort": 25
     },
@@ -245,7 +245,7 @@
       "id": "cat_26",
       "name": "茅系",
       "icon": "🏺",
-      "iconImg": "",
+      "iconImg": "images/分类图标/茅系.jpg",
       "onSale": true,
       "sort": 26
     },
@@ -253,7 +253,7 @@
       "id": "cat_27",
       "name": "水井坊",
       "icon": "🧉",
-      "iconImg": "",
+      "iconImg": "images/分类图标/水井坊.jpg",
       "onSale": true,
       "sort": 27
     },
@@ -261,7 +261,7 @@
       "id": "cat_28",
       "name": "习酒",
       "icon": "🍶",
-      "iconImg": "",
+      "iconImg": "images/分类图标/习酒.jpg",
       "onSale": true,
       "sort": 28
     }
