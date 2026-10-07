@@ -65,13 +65,23 @@
   .mode-tag { display:inline-block; font-size:11px; padding:2px 8px; border-radius:6px; margin-left:8px; vertical-align:middle; }
   .mode-srv { background:#E8F3EC; color:#0F6E56; }
   .mode-static { background:#FDEDE8; color:#B45309; }
+
+  /* 商品图片：最多 3 张 */
+  .imgslot { border: 1px dashed #E0DDD6; border-radius: 10px; padding: 8px; margin-bottom: 8px; background: #fff; }
+  .imgprev { width: 100%; height: 92px; border-radius: 8px; overflow: hidden; background: #EFEDE8;
+             display: flex; align-items: center; justify-content: center; color: #B4B2A9; font-size: 12px; }
+  .imgprev img { width: 100%; height: 100%; object-fit: cover; }
+  .imgrow { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
+  .imgrow input[type=text] { flex: 1; }
+  .mini { padding: 7px 12px; font-size: 12px; white-space: nowrap; }
+  #cos-cfg .hint { font-size: 12px; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>网页版后台 <span id="mode-tag" class="mode-tag"></span></h1>
-  <div class="sub">改完点下方「保存」；要让顾客看到，在下面「发布到网上」推送到码云。<br/>
-  本页既能连本地服务器用，也能作为<b>静态网页直接部署到 Gitee Pages 等开源平台</b>上使用。</div>
+  <div class="sub">改完点下方「保存」；要让顾客看到，在下面「发布到网上」推送到你的仓库 / COS。<br/>
+  本页既能连本地服务器用，也能作为<b>静态网页直接部署</b>到 GitHub Pages / Gitee / 腾讯云 COS 上使用。</div>
 
   <div class="sec">
     <h2>店铺信息</h2>
@@ -101,7 +111,7 @@
 
   <div class="sec">
     <h2>商品分类</h2>
-    <div class="hint">图标填一个表情符号即可，比如 🍶 🍷 🥃</div>
+    <div class="hint">图标优先填「图标图片地址」（圆角显示，更统一）；留空时再用下面的 emoji 兜底。</div>
     <div id="cat-list"></div>
     <button class="add" onclick="addCat()">+ 新增分类</button>
   </div>
@@ -117,12 +127,14 @@
     <details>
       <summary>发布到网上（让所有顾客看到）</summary>
       <div class="tip">本地改只是改你电脑/浏览器里的文件。要让所有顾客看到，要把 <code>data.json</code> 发到网上。<br/>
-      支持 <b>GitHub Pages</b> 与 <b>Gitee 码云</b>：都免费、本页直接用浏览器把文件推送到你的仓库（两者接口都已确认允许跨域）。<br/>
-      选好平台、填好用户名 / 仓库名 / 令牌后，点「推送并发布」即可。</div>
+      <b>GitHub Pages / Gitee 码云</b>：免费，本页直接用浏览器把文件推送到你的仓库（接口已确认允许跨域）。<br/>
+      <b>腾讯云 COS</b>：国内最稳、微信秒开；先在下方填好 COS 设置，「推送并发布」会把 <code>data.json</code> 传到 COS，图片「选图上传」也会直接存到 COS。<br/>
+      选好平台、填好对应信息后，点「推送并发布」即可。</div>
       <div class="field" style="margin-top:14px"><label>平台</label>
         <select id="gy-platform">
           <option value="github">GitHub Pages</option>
           <option value="gitee">Gitee 码云</option>
+          <option value="cos">腾讯云 COS</option>
         </select>
       </div>
       <div class="grid2" style="margin-top:12px">
@@ -130,6 +142,15 @@
         <div class="field"><label>仓库名</label><input type="text" id="gy-repo" placeholder="例如 shop-web"/></div>
       </div>
       <div class="field"><label>私人令牌</label><input type="password" id="gy-token" placeholder="GitHub: repo 权限 PAT；Gitee: 私人令牌"/></div>
+      <div id="cos-cfg" style="margin-top:14px;border-top:1px dashed #E0DDD6;padding-top:12px">
+        <div class="hint" style="margin-bottom:10px">选「腾讯云 COS」时填下面四项：建一个「公有读私有写」存储桶，并部署一个签发临时上传地址的云函数（代码我用单独文件给你）。图片「选图上传」和「推送并发布」都会走 COS。</div>
+        <div class="grid2">
+          <div class="field"><label>存储桶 Bucket</label><input type="text" id="cos-bucket" placeholder="例如 shop-1250000000"/></div>
+          <div class="field"><label>地域 Region</label><input type="text" id="cos-region" placeholder="例如 ap-guangzhou"/></div>
+        </div>
+        <div class="field" style="margin-top:10px"><label>SCF 上传地址（API 网关 / Web 函数 URL）</label><input type="text" id="cos-scf" placeholder="https://xxx.apigw.tencentcs.com/release/cos-upload"/></div>
+        <div class="field" style="margin-top:10px"><label>访问口令（云函数里设的 UPLOAD_TOKEN，可留空）</label><input type="password" id="cos-token" placeholder="与云函数的 UPLOAD_TOKEN 一致"/></div>
+      </div>
       <div class="row" style="margin-top:12px">
         <button class="btn btn-p" onclick="push()">推送并发布</button>
         <button class="btn btn-s" onclick="pullRemote()">从仓库拉取</button>
@@ -170,6 +191,7 @@ function renderAll() {
   const o = localStorage.getItem('gy_owner'), r = localStorage.getItem('gy_repo');
   if (o) document.getElementById('gy-owner').value = o;
   if (r) document.getElementById('gy-repo').value = r;
+  loadCosCfgInputs();
 }
 
 function msg(t, bad) {
@@ -250,17 +272,19 @@ function renderCats() {
         </span>
       </div>
       <div class="row">
-        <div class="field" style="max-width:88px"><label>图标</label>
+        <div class="field" style="max-width:88px"><label>图标 emoji</label>
           <input type="text" value="${esc(c.icon)}" oninput="D.categories[${i}].icon=this.value"/></div>
         <div class="field"><label>分类名称</label>
           <input type="text" value="${esc(c.name)}" oninput="D.categories[${i}].name=this.value"/></div>
         <label class="chk-line"><input type="checkbox" ${c.onSale ? 'checked' : ''}
           onchange="D.categories[${i}].onSale=this.checked"/>上架</label>
       </div>
+      <div class="field"><label>图标图片地址（留空则用上面的 emoji）</label>
+        <input type="text" value="${esc(c.iconImg || '')}" oninput="D.categories[${i}].iconImg=this.value" placeholder="https://.../cat.png"/></div>
     </div>`).join('');
 }
 function addCat() {
-  D.categories.push({ id: 'cat_' + Date.now(), name: '新分类', icon: '🏷️', onSale: true, sort: D.categories.length + 1 });
+  D.categories.push({ id: 'cat_' + Date.now(), name: '新分类', icon: '🏷️', iconImg: '', onSale: true, sort: D.categories.length + 1 });
   renderCats();
 }
 function delCat(i) {
@@ -284,7 +308,22 @@ function catOptions(sel) {
 }
 function renderProds() {
   const box = document.getElementById('prod-list');
-  box.innerHTML = (D.products || []).map((p, i) => `
+  box.innerHTML = (D.products || []).map((p, i) => {
+    const imgs = p.images || [];
+    let slots = '';
+    for (let s = 0; s < 3; s++) {
+      const v = imgs[s] || '';
+      slots += `
+        <div class="imgslot">
+          <div class="imgprev" id="prev-${i}-${s}">${v ? `<img src="${esc(v)}" alt=""/>` : '<span>第 ' + (s + 1) + ' 张（可选）</span>'}</div>
+          <div class="imgrow">
+            <button type="button" class="btn btn-s mini" onclick="pickImg(${i},${s})">选图上传</button>
+            <input type="text" placeholder="或粘贴图片网址" value="${esc(v)}" oninput="setImg(${i},${s},this.value)"/>
+          </div>
+          <input type="file" accept="image/*" id="file-${i}-${s}" style="display:none" onchange="onPickImg(${i},${s},this)"/>
+        </div>`;
+    }
+    return `
     <div class="item">
       <div class="item-top">
         <span class="item-idx">第 ${i + 1} 件</span>
@@ -294,19 +333,19 @@ function renderProds() {
           <button class="del" onclick="delProd(${i})">删除</button>
         </span>
       </div>
-      <div class="field"><label>① 商品图片地址</label>
-        <input type="text" value="${esc((p.images || [])[0] || '')}" oninput="D.products[${i}].images=this.value?[this.value]:[]"/></div>
+      <div class="hint" style="margin-bottom:8px">商品图片（最多 3 张，第 1 张为封面；可「选图上传」直传 COS，或粘贴图片网址）</div>
+      ${slots}
       <div class="row">
-        <div class="field"><label>② 商品分类</label>
+        <div class="field"><label>商品分类</label>
           <select onchange="D.products[${i}].categoryId=this.value">${catOptions(p.categoryId)}</select></div>
-        <div class="field"><label>④ 价格（填 0 = 面议）</label>
+        <div class="field"><label>价格（填 0 = 面议）</label>
           <input type="number" min="0" value="${p.price || 0}" oninput="D.products[${i}].price=+this.value"/></div>
         <div class="field" style="max-width:90px"><label>单位</label>
           <input type="text" value="${esc(p.unit)}" oninput="D.products[${i}].unit=this.value"/></div>
         <label class="chk-line"><input type="checkbox" ${p.onSale ? 'checked' : ''}
           onchange="D.products[${i}].onSale=this.checked"/>上架</label>
       </div>
-      <div class="field"><label>③ 商品名称</label>
+      <div class="field"><label>商品名称</label>
         <input type="text" value="${esc(p.name)}" oninput="D.products[${i}].name=this.value"/></div>
       <div class="grid2">
         <div class="field"><label>规格（可不填）</label>
@@ -318,7 +357,8 @@ function renderProds() {
       <div class="field"><label>介绍（可不填，换行用 | 隔开）</label>
         <textarea rows="2" style="width:100%;padding:9px 11px;border:1px solid #E3E0D9;border-radius:9px;font:14px inherit;"
           oninput="D.products[${i}].desc=this.value.replace(/\|/g,'\\n')">${esc((p.desc || '').replace(/\n/g, '|'))}</textarea></div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 function addProd() {
   D.products.push({
@@ -339,6 +379,67 @@ function mvProd(i, d) {
   renderProds();
 }
 
+/* ---------- 商品图片：最多 3 张，上传到 COS ---------- */
+function pickImg(i, s) { const el = document.getElementById('file-' + i + '-' + s); if (el) el.click(); }
+function setImg(i, s, val) {
+  const p = D.products[i]; if (!p) return;
+  if (!p.images) p.images = [];
+  p.images[s] = val || '';
+  while (p.images.length && !p.images[p.images.length - 1]) p.images.pop();
+  const prev = document.getElementById('prev-' + i + '-' + s);
+  if (prev) prev.innerHTML = val ? `<img src="${esc(val)}" alt=""/>` : '<span>第 ' + (s + 1) + ' 张（可选）</span>';
+}
+async function onPickImg(i, s, input) {
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const url = await uploadImage(file);
+  if (url) setImg(i, s, url);
+  input.value = '';
+}
+async function uploadImage(file) {
+  const cfg = readCosCfg();
+  if (!cfg.ok) { msg(cfg.err, true); return null; }
+  msg('正在上传图片…');
+  try {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const key = 'images/' + Date.now() + '_' + Math.floor(Math.random() * 1e6) + '.' + ext;
+    const sign = await getSignUrl(cfg, key, 'PUT');
+    if (!sign) return null;
+    const putR = await fetch(sign.url, { method: 'PUT', headers: { 'Content-Type': file.type || 'image/jpeg' }, body: file });
+    if (!putR.ok) { msg('上传失败：COS 返回 ' + putR.status, true); return null; }
+    const url = 'https://' + cfg.bucket + '.cos.' + cfg.region + '.myqcloud.com/' + key;
+    msg('图片已上传到 COS');
+    return url;
+  } catch (e) { msg('上传失败：' + e.message, true); return null; }
+}
+async function getSignUrl(cfg, key, method) {
+  try {
+    const u = cfg.scf + (cfg.scf.indexOf('?') > -1 ? '&' : '?') + 'action=sign&key=' + encodeURIComponent(key) + '&method=' + method;
+    const h = {}; if (cfg.token) h['x-token'] = cfg.token;
+    const r = await fetch(u, { headers: h });
+    const j = await r.json();
+    if (r.ok && j.url) return { url: j.url };
+    msg('获取上传地址失败：' + (j.error || 'HTTP ' + r.status), true);
+    return null;
+  } catch (e) { msg('获取上传地址失败：' + e.message, true); return null; }
+}
+function readCosCfg() {
+  const bucket = (localStorage.getItem('cos_bucket') || '').trim();
+  const region = (localStorage.getItem('cos_region') || '').trim();
+  const scf = (localStorage.getItem('cos_scf') || '').trim();
+  const token = (localStorage.getItem('cos_token') || '').trim();
+  if (!bucket || !region || !scf) return { ok:false, err:'请先在下方 COS 设置里填好「存储桶 / 地域 / SCF 上传地址」' };
+  return { ok:true, platform:'cos', bucket, region, scf, token };
+}
+function loadCosCfgInputs() {
+  const set = (id, k) => { const el = document.getElementById(id); if (el && localStorage.getItem(k) != null) el.value = localStorage.getItem(k); };
+  set('cos-bucket', 'cos_bucket'); set('cos-region', 'cos_region'); set('cos-scf', 'cos_scf'); set('cos-token', 'cos_token');
+}
+function persistCosCfg() {
+  [['cos-bucket','cos_bucket'],['cos-region','cos_region'],['cos-scf','cos_scf'],['cos-token','cos_token']]
+    .forEach(([id, k]) => { const el = document.getElementById(id); if (el) localStorage.setItem(k, el.value.trim()); });
+}
+
 /* ---------- 保存（两种模式） ---------- */
 function save() {
   if (HAS_SERVER) {
@@ -352,9 +453,17 @@ function save() {
 
 /* ---------- 发布 / 拉取 / 下载（两种模式） ---------- */
 function push() {
-  const cfg = readCfg();
-  if (!cfg.ok) return msg(cfg.err, true);
-  localStorage.setItem('gy_owner', cfg.owner); localStorage.setItem('gy_repo', cfg.repo);
+  const platform = document.getElementById('gy-platform').value;
+  let cfg;
+  if (platform === 'cos') {
+    cfg = readCosCfg();
+    if (!cfg.ok) return msg(cfg.err, true);
+    persistCosCfg();
+  } else {
+    cfg = readCfg();
+    if (!cfg.ok) return msg(cfg.err, true);
+    localStorage.setItem('gy_owner', cfg.owner); localStorage.setItem('gy_repo', cfg.repo);
+  }
   msg('正在推送…');
   if (HAS_SERVER) {
     post('/api/push-gitee', { owner: cfg.owner, repo: cfg.repo, token: cfg.token, data: D })
@@ -365,15 +474,26 @@ function push() {
 }
 function showPushResult(d) {
   const tip = document.getElementById('gy-tip');
+  const platform = document.getElementById('gy-platform').value;
   if (d.ok) {
     msg('已推送并发布');
-    tip.innerHTML = '推送成功。展示页读取的就是这个仓库的 <code>data.json</code>，已自动更新（Pages 通常 1 分钟内生效）。';
+    tip.innerHTML = platform === 'cos'
+      ? '推送成功。展示页读取的就是这个 COS 存储桶里的 <code>data.json</code>，已自动更新（通常几秒内生效）。'
+      : '推送成功。展示页读取的就是这个仓库的 <code>data.json</code>，已自动更新（Pages 通常 1 分钟内生效）。';
   } else { msg('推送失败：' + d.error, true); tip.textContent = d.error; }
 }
 
 function pullRemote() {
-  const cfg = readCfg();
-  if (!cfg.ok) return msg(cfg.err, true);
+  const platform = document.getElementById('gy-platform').value;
+  let cfg;
+  if (platform === 'cos') {
+    cfg = readCosCfg();
+    if (!cfg.ok) return msg(cfg.err, true);
+    persistCosCfg();
+  } else {
+    cfg = readCfg();
+    if (!cfg.ok) return msg(cfg.err, true);
+  }
   msg('正在拉取…');
   if (HAS_SERVER) {
     post('/api/pull-gitee', { owner: cfg.owner, repo: cfg.repo, token: cfg.token })
@@ -400,9 +520,11 @@ function ub64(b64str) { return decodeURIComponent(escape(atob(b64str))); }
 
 /* 静态模式：按平台路由（GitHub / Gitee 都支持浏览器直推） */
 async function pushStatic(cfg) {
+  if (cfg.platform === 'cos') return pushCos(cfg);
   return cfg.platform === 'github' ? pushGitHub(cfg) : pushGitee(cfg);
 }
 async function pullStatic(cfg) {
+  if (cfg.platform === 'cos') return pullCos(cfg);
   return cfg.platform === 'github' ? pullGitHub(cfg) : pullGitee(cfg);
 }
 
@@ -439,6 +561,25 @@ async function pullGitee(cfg) {
     if (r.status !== 200 || !j.content) return { ok: false, error: (j && j.message) || ('HTTP ' + r.status) };
     return { ok: true, data: JSON.parse(ub64(j.content)) };
   } catch (e) { return { ok: false, error: e.message || String(e) }; }
+}
+
+/* ---- 腾讯云 COS（通过 SCF 签发临时上传地址，密钥不落前端） ---- */
+async function pushCos(cfg) {
+  try {
+    const sign = await getSignUrl(cfg, 'data.json', 'PUT');
+    if (!sign) return { ok:false, error:'无法获取上传地址' };
+    const putR = await fetch(sign.url, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(D, null, 2) });
+    if (putR.ok) return { ok:true };
+    return { ok:false, error:'COS 返回 ' + putR.status };
+  } catch (e) { return { ok:false, error: e.message }; }
+}
+async function pullCos(cfg) {
+  try {
+    const url = 'https://' + cfg.bucket + '.cos.' + cfg.region + '.myqcloud.com/data.json';
+    const r = await fetch(url + '?_t=' + Date.now());
+    if (!r.ok) return { ok:false, error:'HTTP ' + r.status };
+    return { ok:true, data: await r.json() };
+  } catch (e) { return { ok:false, error: e.message }; }
 }
 
 /* ---- GitHub ---- */
