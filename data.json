@@ -3,7 +3,7 @@
   "banners": [
     {
       "id": "bn_1",
-      "title": "酒专场",
+      "title": "诚源酒庄 · 名酒专场",
       "subtitle": "茅台飞天 53° 现货发售",
       "color": "#8B2E2E",
       "image": "",
@@ -30,23 +30,23 @@
     }
   ],
   "profile": {
-    "name": "小大",
-    "tagline": "开心",
-    "avatar": "http://q1.qlogo.cn/g?b=qq&nk=1419584363&s=100",
-    "wechat": "NNNNNNNNN",
-    "phone": "8888888888888",
-    "address": "郑州",
-    "hours": "10-22",
-    "notice": "自定义公告"
+    "name": "永盛酒庄",
+    "tagline": "正品名酒 · 支持验货",
+    "avatar": "",
+    "wechat": "chengyuan-wine",
+    "wechatQr": "",
+    "phone": "13900001111",
+    "address": "XX 市 XX 区中山路 88 号",
+    "hours": "09:00 - 21:30",
+    "notice": "城区内满 500 元免费送货"
   },
   "categories": [
     {
       "id": "cat_baijiu",
       "name": "白酒",
-      "icon": "",
+      "icon": "🍶",
       "onSale": true,
-      "sort": 1,
-      "iconImg": "https://image.suning.cn/uimg/sop/commodity/279989701748433590850500_x.jpg"
+      "sort": 1
     },
     {
       "id": "cat_hongjiu",
@@ -58,10 +58,9 @@
     {
       "id": "cat_yangjiu",
       "name": "洋酒",
-      "icon": "",
+      "icon": "🥃",
       "onSale": true,
-      "sort": 3,
-      "iconImg": "http://q1.qlogo.cn/g?b=qq&nk=1419584363&s=100"
+      "sort": 3
     },
     {
       "id": "cat_pijiu",
@@ -69,6 +68,13 @@
       "icon": "🍺",
       "onSale": true,
       "sort": 4
+    },
+    {
+      "id": "cat_lipin",
+      "name": "礼盒",
+      "icon": "🎁",
+      "onSale": true,
+      "sort": 5
     }
   ],
   "products": [
@@ -79,13 +85,11 @@
       "price": 2680,
       "unit": "瓶",
       "spec": "500ml · 酱香型",
-      "desc": "\n茅\n台\n酒\n经\n典\n之\n作\n，\n酱\n香\n突\n出\n、\n优\n雅\n细\n腻\n。\n",
-      "images": [
-        "https://image.suning.cn/uimg/sop/commodity/279989701748433590850500_x.jpg"
-      ],
+      "desc": "茅台酒经典之作，酱香突出、优雅细腻。\n支持验货，假一赔十。",
+      "images": [],
       "tags": [
         "热销",
-        "正品"
+        "正品保障"
       ],
       "onSale": true,
       "sort": 1
@@ -98,9 +102,7 @@
       "unit": "瓶",
       "spec": "500ml · 浓香型",
       "desc": "五粮液核心大单品，浓香典范。",
-      "images": [
-        "https://Listtab.github.io/shop-web/images/1791366994673_548978.jpg"
-      ],
+      "images": [],
       "tags": [
         "热销"
       ],
@@ -115,9 +117,7 @@
       "unit": "瓶",
       "spec": "500ml · 浓香型",
       "desc": "源自 1573 国宝窖池群，陈香优雅。",
-      "images": [
-        "https://Listtab.github.io/shop-web/images/1791367216283_735578.webp"
-      ],
+      "images": [],
       "tags": [],
       "onSale": true,
       "sort": 3
@@ -192,6 +192,21 @@
       "tags": [],
       "onSale": true,
       "sort": 8
+    },
+    {
+      "id": "p_9",
+      "name": "双支红酒礼盒",
+      "categoryId": "cat_lipin",
+      "price": 299,
+      "unit": "盒",
+      "spec": "750ml × 2 · 含礼袋",
+      "desc": "波尔多 AOC 双支装，配礼盒礼袋，送礼体面。",
+      "images": [],
+      "tags": [
+        "送礼"
+      ],
+      "onSale": true,
+      "sort": 9
     },
     {
       "id": "p_10",
