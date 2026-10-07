@@ -140,28 +140,11 @@
     .panel-body { padding: 20px 24px; }
     .prodcard .pc-body { padding: 16px; }
   }
-
-  /* ===== 管理密码锁 ===== */
-  .lock { position: fixed; inset: 0; background: #F6F4F1; z-index: 200; display: flex;
-          align-items: center; justify-content: center; padding: 20px; }
-  .lock.hidden { display: none; }
-  .lock-box { background: #fff; border-radius: 16px; padding: 26px 24px; width: 100%; max-width: 360px;
-              box-shadow: 0 10px 40px rgba(0,0,0,.12); }
-  .lock-box h2 { margin: 0 0 6px; font-size: 18px; }
-  .lock-box .tip { margin: 0 0 16px; }
-  .lock-box .btn { width: 100%; margin-top: 10px; }
-  .lock-err { color: #C0392B; font-size: 13px; min-height: 20px; margin-top: 8px; }
-  .lock-tools { display: flex; gap: 8px; justify-content: center; margin-top: 14px;
-                flex-wrap: wrap; }
-  .lock-tools button { background: none; border: none; color: #8B8378; font-size: 12px;
-                       cursor: pointer; text-decoration: underline; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>网页版后台 <span id="mode-tag" class="mode-tag"></span>
-    <button class="btn btn-s mini" style="float:right;margin-left:8px" onclick="lockNow()">🔒 锁定</button>
-  </h1>
+  <h1>网页版后台 <span id="mode-tag" class="mode-tag"></span></h1>
   <div class="sub">改完在下面「发布到网上」推送到 GitHub / COS，顾客就能看到。<br/>
   本页既能连本地服务器用，也能作为<b>静态网页直接部署</b>到 GitHub Pages / 腾讯云 COS 上使用。</div>
 
@@ -258,81 +241,15 @@
 
 <div id="toast" class="toast"></div>
 
-<!-- 管理密码锁 -->
-<div class="lock" id="lock">
-  <div class="lock-box">
-    <h2 id="lock-title">后台管理</h2>
-    <div class="tip" id="lock-tip">请输入管理密码</div>
-    <input type="password" id="lock-pw" placeholder="管理密码" onkeydown="if(event.key==='Enter')tryUnlock()"/>
-    <div class="lock-err" id="lock-err"></div>
-    <button class="btn btn-p" onclick="tryUnlock()">进入后台</button>
-    <div class="lock-tools">
-      <button onclick="setPwPrompt()">设置 / 修改密码</button>
-    </div>
-  </div>
-</div>
-
 <script>
 let D = null;
 let HAS_SERVER = false;
 
-/* ---------- 管理密码锁（仅本机浏览器保存，明文不落页面） ---------- */
-const PW_KEY = 'shop_admin_pw';
-function lockNow() {
-  sessionStorage.removeItem('shop_admin_ok');
-  document.getElementById('lock').classList.remove('hidden');
-  document.getElementById('lock-pw').value = '';
-  document.getElementById('lock-err').textContent = '';
-}
-function tryUnlock() {
-  const input = document.getElementById('lock-pw');
-  const err = document.getElementById('lock-err');
-  const pw = input.value;
-  if (!pw) { err.textContent = '请输入密码'; return; }
-  const saved = localStorage.getItem(PW_KEY) || '';
-  if (!saved) {
-    localStorage.setItem(PW_KEY, pw);          // 首次使用：把这次输入的密码存下来
-  } else if (saved !== pw) {
-    err.textContent = '密码不对，请重试';
-    input.value = '';
-    return;
-  }
-  sessionStorage.setItem('shop_admin_ok', '1');
-  document.getElementById('lock').classList.add('hidden');
-  input.value = '';
-  err.textContent = '';
-  boot();
-}
-function setPwPrompt() {
-  const cur = localStorage.getItem(PW_KEY);
-  if (cur) {
-    const ask = prompt('当前已设置密码。要修改请先输入旧密码：');
-    if (ask !== cur) { alert('旧密码不对，未修改。'); return; }
-  }
-  const n = prompt('设置新的管理密码（下次进入后台用它）：');
-  if (!n) return;
-  localStorage.setItem(PW_KEY, n);
-  sessionStorage.setItem('shop_admin_ok', '1');
-  document.getElementById('lock').classList.add('hidden');
-  alert('密码已设置 / 修改成功。');
-}
-
 /* ---------- 载入（相对路径，兼容本地服务器与静态平台） ---------- */
-function boot() {
-  if (sessionStorage.getItem('shop_admin_ok') === '1') {
-    document.getElementById('lock').classList.add('hidden');
-  } else {
-    document.getElementById('lock').classList.remove('hidden');
-    document.getElementById('lock-tip').textContent =
-      localStorage.getItem(PW_KEY) ? '请输入管理密码' : '首次使用：请设置一个管理密码';
-    return;
-  }
-  fetch('./data.json?_t=' + Date.now())
-    .then(r => r.json())
-    .then(d => { D = d; renderAll(); probeServer(); })
-    .catch(() => msg('读不到数据文件（请确认与本页同目录有 data.json）', true));
-}
-boot();
+fetch('./data.json?_t=' + Date.now())
+  .then(r => r.json())
+  .then(d => { D = d; renderAll(); probeServer(); })
+  .catch(() => msg('读不到数据文件（请确认与本页同目录有 data.json）', true));
 
 function probeServer() {
   fetch('/api/data').then(r => { HAS_SERVER = r.ok; renderModeTag(); })
