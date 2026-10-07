@@ -135,6 +135,13 @@
     .imgslots { grid-template-columns: repeat(3, 1fr); }
   }
 
+  /* 单图上传槽（轮播图 / 微信码 / 分类图标） */
+  .up1 { border: 1px dashed #E0DDD6; border-radius: 10px; padding: 8px; background: #fff; }
+  .up1 .imgprev { height: 104px; }
+  .imgrow.two { flex-direction: row; align-items: center; }
+  .imgrow.two input[type=text] { flex: 1; min-width: 0; }
+  .qr-note { font-size: 12px; color: #9A938A; margin-top: 6px; }
+
   /* 电脑端：表单标签与输入更宽松 */
   @media (min-width: 1000px) {
     .panel-body { padding: 20px 24px; }
@@ -169,7 +176,19 @@
       <div class="field"><label>地址</label><input type="text" id="pf-address"/></div>
       <div class="field"><label>营业时间</label><input type="text" id="pf-hours"/></div>
     </div>
-    <div class="field"><label>首页公告（留空则不显示公告条）</label><input type="text" id="pf-notice"/></div>
+    <div class="field"><label>首页公告（留空则不显示公告条；也会显示在微信号卡片里）</label><input type="text" id="pf-notice"/></div>
+    <div class="field">
+      <label>微信好友二维码</label>
+      <div class="up1">
+        <div class="imgprev" id="prev-qr"><span>未上传</span></div>
+        <div class="imgrow two">
+          <button type="button" class="btn btn-s mini" onclick="pickQr()">上传二维码</button>
+          <input type="text" id="pf-qr" placeholder="或粘贴图片网址" oninput="setQr(this.value)"/>
+        </div>
+        <input type="file" accept="image/*" id="file-qr" style="display:none" onchange="onPickQr(this)"/>
+      </div>
+      <div class="qr-note">上传后：首页微信号卡片显示小图（点击看大图），「联系」页显示大图，方便顾客长按识别加你。</div>
+    </div>
     </div>
   </div>
 
@@ -192,7 +211,8 @@
       <span class="panel-arrow">▾</span>
     </div>
     <div class="panel-body">
-      <div class="hint">点分类展开 / 收起；点商品那一行展开编辑详情。每件最多 3 张图，选图上传直传 GitHub。</div>
+      <div class="hint">点分类展开 / 收起；点商品那一行展开编辑详情。每件最多 3 张图，选图上传直传 GitHub。<br/>
+      只想改价格 → 用 <a href="prices.html" style="color:#8B2E2E">💰 价格批量修改页</a>，更快。</div>
       <div id="manage-list"></div>
       <button class="add" onclick="addCat()">+ 新增分类</button>
     </div>
@@ -324,6 +344,22 @@ function renderProfile() {
     el.value = p[k] || '';
     el.oninput = e => { p[k] = e.target.value; updSums(); };
   });
+  setQr(p.wechatQr || '');
+}
+function setQr(v) {
+  const p = D.profile || (D.profile = {});
+  p.wechatQr = v || '';
+  const el = document.getElementById('pf-qr'); if (el && el.value !== p.wechatQr) el.value = p.wechatQr;
+  const pv = document.getElementById('prev-qr');
+  if (pv) pv.innerHTML = p.wechatQr ? '<img src="' + esc(p.wechatQr) + '" alt=""/>' : '<span>未上传</span>';
+}
+function pickQr() { const el = document.getElementById('file-qr'); if (el) el.click(); }
+async function onPickQr(input) {
+  const f = input.files && input.files[0];
+  if (!f) return;
+  const url = await uploadImage(f);
+  if (url) setQr(url);
+  input.value = '';
 }
 
 /* ---------- 轮播图 ---------- */
@@ -345,9 +381,18 @@ function renderBanners() {
         <div class="field"><label>副标题</label>
           <input type="text" value="${esc(b.subtitle)}" oninput="D.banners[${i}].subtitle=this.value"/></div>
       </div>
+      <div class="field">
+        <label>轮播图片</label>
+        <div class="up1">
+          <div class="imgprev" id="prev-bn-${i}">${b.image ? `<img src="${esc(b.image)}" alt=""/>` : '<span>未上传（留空则用纯色背景）</span>'}</div>
+          <div class="imgrow two">
+            <button type="button" class="btn btn-s mini" onclick="pickBn(${i})">上传图片</button>
+            <input type="text" value="${esc(b.image)}" placeholder="或粘贴图片网址" oninput="setBn(${i},this.value)"/>
+          </div>
+          <input type="file" accept="image/*" id="file-bn-${i}" style="display:none" onchange="onPickBn(${i},this)"/>
+        </div>
+      </div>
       <div class="row">
-        <div class="field"><label>轮播图片地址（可留空）</label>
-          <input type="text" value="${esc(b.image)}" oninput="D.banners[${i}].image=this.value"/></div>
         <div class="field" style="max-width:110px"><label>背景色</label>
           <input type="text" value="${esc(b.color)}" oninput="D.banners[${i}].color=this.value"/></div>
         <label class="chk-line"><input type="checkbox" ${b.onSale ? 'checked' : ''}
@@ -355,8 +400,21 @@ function renderBanners() {
       </div>
     </div>`).join('');
 }
-function addBanner() {
-  D.banners.push({ id: 'bn_' + Date.now(), title: '新轮播图', subtitle: '', color: '#8B2E2E', image: '', onSale: true, sort: D.banners.length + 1 });
+function setBn(i, v) {
+  const b = D.banners[i]; if (!b) return;
+  b.image = v || '';
+  const pv = document.getElementById('prev-bn-' + i);
+  if (pv) pv.innerHTML = b.image ? '<img src="' + esc(b.image) + '" alt=""/>' : '<span>未上传（留空则用纯色背景）</span>';
+}
+function pickBn(i) { const el = document.getElementById('file-bn-' + i); if (el) el.click(); }
+async function onPickBn(i, input) {
+  const f = input.files && input.files[0];
+  if (!f) return;
+  const url = await uploadImage(f);
+  if (url) setBn(i, url);
+  input.value = '';
+}
+function addBanner() {  D.banners.push({ id: 'bn_' + Date.now(), title: '新轮播图', subtitle: '', color: '#8B2E2E', image: '', onSale: true, sort: D.banners.length + 1 });
   renderBanners(); updSums();
 }
 function delBanner(i) { D.banners.splice(i, 1); renderBanners(); updSums(); }
