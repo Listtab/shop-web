@@ -42,46 +42,235 @@
   },
   "categories": [
     {
-      "id": "cat_baijiu",
-      "name": "白酒",
+      "id": "cat_01",
+      "name": "500元左右酒",
       "icon": "🍶",
+      "iconImg": "",
       "onSale": true,
       "sort": 1
     },
     {
-      "id": "cat_hongjiu",
-      "name": "红酒",
-      "icon": "🍷",
+      "id": "cat_02",
+      "name": "光瓶品鉴",
+      "icon": "🫙",
+      "iconImg": "",
       "onSale": true,
       "sort": 2
     },
     {
-      "id": "cat_yangjiu",
-      "name": "洋酒",
+      "id": "cat_03",
+      "name": "薄酒",
       "icon": "🥃",
+      "iconImg": "",
       "onSale": true,
       "sort": 3
     },
     {
-      "id": "cat_pijiu",
-      "name": "啤酒",
+      "id": "cat_04",
+      "name": "牛栏山",
       "icon": "🍺",
+      "iconImg": "",
       "onSale": true,
       "sort": 4
     },
     {
-      "id": "cat_lipin",
-      "name": "礼盒",
+      "id": "cat_05",
+      "name": "生肖系列",
       "icon": "🎁",
+      "iconImg": "",
       "onSale": true,
       "sort": 5
+    },
+    {
+      "id": "cat_06",
+      "name": "千元送礼专区",
+      "icon": "🐴",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 6
+    },
+    {
+      "id": "cat_07",
+      "name": "钓鱼台",
+      "icon": "🎣",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 7
+    },
+    {
+      "id": "cat_08",
+      "name": "彦渡",
+      "icon": "🧧",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 8
+    },
+    {
+      "id": "cat_09",
+      "name": "董酒",
+      "icon": "🍲",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 9
+    },
+    {
+      "id": "cat_10",
+      "name": "国台",
+      "icon": "🏮",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 10
+    },
+    {
+      "id": "cat_11",
+      "name": "酒鬼",
+      "icon": "💰",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 11
+    },
+    {
+      "id": "cat_12",
+      "name": "金沙",
+      "icon": "💍",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 12
+    },
+    {
+      "id": "cat_13",
+      "name": "西凤",
+      "icon": "🧧",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 13
+    },
+    {
+      "id": "cat_14",
+      "name": "珍酒",
+      "icon": "🌾",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 14
+    },
+    {
+      "id": "cat_15",
+      "name": "郎酒",
+      "icon": "🍶",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 15
+    },
+    {
+      "id": "cat_16",
+      "name": "泸州老窖",
+      "icon": "🥃",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 16
+    },
+    {
+      "id": "cat_17",
+      "name": "大坛酒专区",
+      "icon": "💼",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 17
+    },
+    {
+      "id": "cat_18",
+      "name": "小酒及礼盒专区",
+      "icon": "🎁",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 18
+    },
+    {
+      "id": "cat_19",
+      "name": "老年份酒专区",
+      "icon": "🧧",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 19
+    },
+    {
+      "id": "cat_20",
+      "name": "婚宴用酒专区",
+      "icon": "🎊",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 20
+    },
+    {
+      "id": "cat_21",
+      "name": "百元口粮酒",
+      "icon": "🍚",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 21
+    },
+    {
+      "id": "cat_22",
+      "name": "沱牌舍得",
+      "icon": "🪙",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 22
+    },
+    {
+      "id": "cat_23",
+      "name": "汾酒",
+      "icon": "🥢",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 23
+    },
+    {
+      "id": "cat_24",
+      "name": "剑南春",
+      "icon": "🎂",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 24
+    },
+    {
+      "id": "cat_25",
+      "name": "五粮液",
+      "icon": "🍾",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 25
+    },
+    {
+      "id": "cat_26",
+      "name": "茅系",
+      "icon": "🏺",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 26
+    },
+    {
+      "id": "cat_27",
+      "name": "水井坊",
+      "icon": "🧉",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 27
+    },
+    {
+      "id": "cat_28",
+      "name": "习酒",
+      "icon": "🍶",
+      "iconImg": "",
+      "onSale": true,
+      "sort": 28
     }
   ],
   "products": [
     {
       "id": "p_1",
       "name": "贵州茅台 飞天 53°",
-      "categoryId": "cat_baijiu",
+      "categoryId": "cat_25",
       "price": 2680,
       "unit": "瓶",
       "spec": "500ml · 酱香型",
@@ -97,7 +286,7 @@
     {
       "id": "p_2",
       "name": "五粮液 第八代普五",
-      "categoryId": "cat_baijiu",
+      "categoryId": "cat_21",
       "price": 1099,
       "unit": "瓶",
       "spec": "500ml · 浓香型",
@@ -112,7 +301,7 @@
     {
       "id": "p_3",
       "name": "国窖 1573",
-      "categoryId": "cat_baijiu",
+      "categoryId": "cat_16",
       "price": 980,
       "unit": "瓶",
       "spec": "500ml · 浓香型",
@@ -125,7 +314,7 @@
     {
       "id": "p_4",
       "name": "拉菲传奇 波尔多红",
-      "categoryId": "cat_hongjiu",
+      "categoryId": "cat_01",
       "price": 168,
       "unit": "瓶",
       "spec": "750ml · 法国 AOC",
@@ -140,7 +329,7 @@
     {
       "id": "p_5",
       "name": "奔富 BIN 389",
-      "categoryId": "cat_hongjiu",
+      "categoryId": "cat_01",
       "price": 468,
       "unit": "瓶",
       "spec": "750ml · 澳大利亚",
@@ -155,7 +344,7 @@
     {
       "id": "p_6",
       "name": "轩尼诗 VSOP",
-      "categoryId": "cat_yangjiu",
+      "categoryId": "cat_18",
       "price": 458,
       "unit": "瓶",
       "spec": "700ml · 干邑白兰地",
@@ -168,7 +357,7 @@
     {
       "id": "p_7",
       "name": "麦卡伦 12 年雪莉桶",
-      "categoryId": "cat_yangjiu",
+      "categoryId": "cat_18",
       "price": 0,
       "unit": "瓶",
       "spec": "700ml · 单一麦芽威士忌",
@@ -183,7 +372,7 @@
     {
       "id": "p_8",
       "name": "青岛啤酒经典 1903",
-      "categoryId": "cat_pijiu",
+      "categoryId": "cat_18",
       "price": 96,
       "unit": "箱",
       "spec": "500ml × 12 罐",
@@ -196,7 +385,7 @@
     {
       "id": "p_9",
       "name": "双支红酒礼盒",
-      "categoryId": "cat_lipin",
+      "categoryId": "cat_06",
       "price": 299,
       "unit": "盒",
       "spec": "750ml × 2 · 含礼袋",
@@ -211,20 +400,20 @@
     {
       "id": "p_10",
       "name": "茅台王子酒（下架示例）",
-      "categoryId": "cat_baijiu",
+      "categoryId": "cat_25",
       "price": 328,
       "unit": "瓶",
       "spec": "500ml · 酱香型",
       "desc": "此商品演示「下架」状态：用户端不可见，管理端可重新上架。",
       "images": [],
       "tags": [],
-      "onSale": false,
+      "onSale": true,
       "sort": 10
     },
     {
       "id": "p_1791353400072",
       "name": "剑南春 水晶剑",
-      "categoryId": "cat_baijiu",
+      "categoryId": "cat_20",
       "price": 428,
       "unit": "瓶",
       "spec": "500ml · 浓香型",
@@ -241,7 +430,7 @@
     {
       "id": "p_1791353400073",
       "name": "人头马 XO",
-      "categoryId": "cat_yangjiu",
+      "categoryId": "cat_18",
       "price": 0,
       "unit": "瓶",
       "spec": "700ml · 干邑",
