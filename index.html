@@ -76,12 +76,6 @@
   .notice { margin:12px 14px 0; background:#FDF4E3; color:#8A6212; font-size:12px;
             padding:9px 12px; border-radius:10px; display:flex; gap:6px; align-items:center; }
 
-  /* ===== 品牌标语横幅（唯一一处宋体）===== */
-  .band { margin:20px 14px 0; padding:26px 18px; text-align:center; border-radius:14px;
-          background:linear-gradient(135deg,#F7EFE6,#F2E7DA); border:1px solid #EBDFD0; }
-  .band-t { font-family:"Songti SC","STSong","SimSun",serif; font-size:21px; font-weight:700;
-            color:var(--ink); letter-spacing:1px; }
-
   /* ===== 搜索 ===== */
   .search { margin:14px 14px 0; }
   .search input { width:100%; background:var(--card); border:1px solid var(--line); border-radius:999px;
@@ -207,7 +201,7 @@
     :root { --appw:1000px; --cols:3; }
     .banner { height:260px; }
     .g-img { height:220px; }
-    .cats, .notice, .search, .sec-title, .band, .cat-more, .rail, .wx-card, .shop-head { margin-left:24px; margin-right:24px; }
+    .cats, .notice, .search, .sec-title, .cat-more, .rail, .wx-card, .shop-head { margin-left:24px; margin-right:24px; }
     .cats { padding-left:0; padding-right:0; }
     .goods { padding:8px 8px 10px; }
     .rail .r-card, .rail .r-img { width:160px; }
@@ -252,8 +246,6 @@
 
     <div class="cats" id="cats"></div>
     <div class="cat-more" onclick="openSheet()">全部分类 ▾</div>
-
-    <div class="band"><div class="band-t" id="band-t"></div></div>
 
     <div class="search">
       <input type="text" id="search" placeholder="搜索商品名称…" oninput="renderProducts()"/>
@@ -400,7 +392,7 @@ function matches(p) {
 /* ============ 渲染 ============ */
 function renderAll() {
   renderBanner(); renderShop(); renderWx(); renderNotice();
-  renderCats(); renderCatsSheet(); renderBand(); renderRail(); renderProducts();
+  renderCats(); renderCatsSheet(); renderRail(); renderProducts();
 }
 
 function renderBanner() {
@@ -506,11 +498,10 @@ function closeSheet() {
   document.getElementById('sheet').classList.remove('show');
   document.getElementById('sheet-mask').classList.remove('show');
 }
-function pickCat(id) { setCat(id); closeSheet(); }
-
-function renderBand() {
-  const p = DATA.profile;
-  document.getElementById('band-t').textContent = (p.name || '本店') + '，' + (p.tagline || '欢迎光临');
+function pickCat(id) {
+  // 从「分类」抽屉选完要回到首页看商品，否则首页是隐藏的会看不到
+  if (document.getElementById('page-home').style.display === 'none') switchTab('home');
+  setCat(id);
 }
 
 function renderRail() {
