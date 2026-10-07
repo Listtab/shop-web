@@ -357,7 +357,7 @@ function pickQr() { const el = document.getElementById('file-qr'); if (el) el.cl
 async function onPickQr(input) {
   const f = input.files && input.files[0];
   if (!f) return;
-  const url = await uploadImage(f);
+  const url = await uploadImage(f, '微信好友码', '微信二维码');
   if (url) setQr(url);
   input.value = '';
 }
@@ -410,7 +410,8 @@ function pickBn(i) { const el = document.getElementById('file-bn-' + i); if (el)
 async function onPickBn(i, input) {
   const f = input.files && input.files[0];
   if (!f) return;
-  const url = await uploadImage(f);
+  const b = D.banners[i];
+  const url = await uploadImage(f, (b && b.title) || '轮播图', '轮播图');
   if (url) setBn(i, url);
   input.value = '';
 }
@@ -454,7 +455,16 @@ function categoryCardHtml(c) {
         </span>
       </div>
       <div class="field" style="margin-top:8px"><label>图标图片地址（留空用上面 emoji）</label>
-        <input type="text" value="${esc(c.iconImg || '')}" oninput="setCatField('${c.id}','iconImg',this.value)" placeholder="https://.../cat.png"/></div>
+        <div class="up1">
+          <div class="imgprev" id="prev-cat-${c.id}">${c.iconImg ? `<img src="${esc(c.iconImg)}" alt=""/>` : '<span>未上传（可用商品原图截图）</span>'}</div>
+          <div class="imgrow two">
+            <button type="button" class="btn btn-s mini" onclick="pickCatIcon('${c.id}')">上传分类图标</button>
+            <input type="text" value="${esc(c.iconImg || '')}" placeholder="或粘贴图片网址" oninput="setCatIcon('${c.id}',this.value)"/>
+          </div>
+          <input type="file" accept="image/*" id="file-cat-${c.id}" style="display:none" onchange="onPickCatIcon('${c.id}',this)"/>
+        </div>
+        <div class="qr-note">上传后文件名会用分类中文名（如 <code>images/分类图标/五粮液.jpg</code>），方便后期辨认与更换。</div>
+      </div>
     </div>
     <div class="cc-prods">
       ${products.map(p => productCardHtml(D.products.indexOf(p))).join('')}
@@ -488,6 +498,21 @@ function uncatCardHtml(list) {
       </div>
       <div class="cc-body">${body}</div>
     </div>`;
+}
+function setCatIcon(id, v) {
+  const c = (D.categories || []).find(x => x.id === id); if (!c) return;
+  c.iconImg = v || '';
+  const pv = document.getElementById('prev-cat-' + id);
+  if (pv) pv.innerHTML = c.iconImg ? '<img src="' + esc(c.iconImg) + '" alt=""/>' : '<span>未上传（可用商品原图截图）</span>';
+}
+function pickCatIcon(id) { const el = document.getElementById('file-cat-' + id); if (el) el.click(); }
+async function onPickCatIcon(id, input) {
+  const f = input.files && input.files[0];
+  if (!f) return;
+  const c = (D.categories || []).find(x => x.id === id);
+  const url = await uploadImage(f, (c && c.name) || '分类图标', '分类图标');
+  if (url) setCatIcon(id, url);
+  input.value = '';
 }
 function setCatField(id, key, val) {
   const c = (D.categories || []).find(x => x.id === id); if (!c) return;
@@ -647,14 +672,15 @@ function setImg(i, s, val) {
 async function onPickImg(i, s, input) {
   const file = input.files && input.files[0];
   if (!file) return;
-  const url = await uploadImage(file);
+  const p = D.products[i];
+  const url = await uploadImage(file, (p && p.name) || '', '商品图片');
   if (url) setImg(i, s, url);
   input.value = '';
 }
-async function uploadImage(file) {
+async function uploadImage(file, nameHint, folder) {
   const platform = document.getElementById('gy-platform').value;
   if (platform === 'cos') return uploadImageCos(file);
-  return uploadImageGitHub(file);
+  return uploadImageGitHub(file, nameHint, folder);
 }
 async function uploadImageCos(file) {
   const cfg = readCosCfg();
@@ -672,24 +698,34 @@ async function uploadImageCos(file) {
     return url;
   } catch (e) { msg('上传失败：' + e.message, true); return null; }
 }
-async function uploadImageGitHub(file) {
+function safeCn(s) {
+  return String(s || '').trim()
+    .replace(/[\\/:*?"<>|]/g, '')   // 去掉文件系统/URL 非法字符
+    .replace(/\s+/g, '')             // 去掉空格
+    .slice(0, 40);
+}
+async function uploadImageGitHub(file, nameHint, folder) {
   const cfg = readCfg();
   if (!cfg.ok) { msg(cfg.err, true); return null; }
-  msg('正在上传图片到 GitHub…');
+  msg('正在上传图片…');
   try {
-    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
-    const path = 'images/' + Date.now() + '_' + Math.floor(Math.random() * 1e6) + '.' + ext;
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '') || 'jpg';
+    const cn = safeCn(nameHint);
+    const dir = folder || '其他图片';
+    // 文件名用中文名；重名时 GitHub 覆盖同一文件，正好用于"换图"
+    const path = 'images/' + dir + '/' + (cn || ('img_' + Date.now())) + '.' + ext;
     const content = await fileToBase64(file);
     const h = { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
-    const url = 'https://api.github.com/repos/' + encodeURIComponent(cfg.owner) + '/' + encodeURIComponent(cfg.repo) + '/contents/' + path;
+    const enc = path.split('/').map(encodeURIComponent).join('/');
+    const url = 'https://api.github.com/repos/' + encodeURIComponent(cfg.owner) + '/' + encodeURIComponent(cfg.repo) + '/contents/' + enc;
     let sha = '';
     try { const g = await fetch(url, { headers: h }); if (g.ok) { const j = await g.json(); sha = j.sha || ''; } } catch (e) {}
-    const body = { message: '上传图片 ' + path, content: content };
+    const body = { message: '上传图片 ' + (cn || file.name), content: content };
     if (sha) body.sha = sha;
     const r = await fetch(url, { method: 'PUT', headers: h, body: JSON.stringify(body) });
     if (!r.ok) { const j = await r.json().catch(() => ({})); msg('上传失败：' + (j.message || 'HTTP ' + r.status), true); return null; }
-    const publicUrl = 'https://' + cfg.owner + '.github.io/' + cfg.repo + '/' + path;
-    msg('图片已上传（Pages 约 1 分钟内可显示）');
+    const publicUrl = 'https://' + cfg.owner + '.github.io/' + cfg.repo + '/' + enc;
+    msg('已上传：' + (cn || file.name));
     return publicUrl;
   } catch (e) { msg('上传失败：' + e.message, true); return null; }
 }
