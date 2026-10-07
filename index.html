@@ -59,7 +59,8 @@
   .cat { flex-shrink: 0; width: 64px; text-align: center; cursor: pointer; padding: 4px 0;
          border-radius: 12px; transition: .15s; }
   .cat .c-ic { width: 50px; height: 50px; margin: 0 auto; border-radius: 16px; background: #fff;
-               font-size: 24px; line-height: 50px; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+               font-size: 24px; line-height: 50px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,.05); overflow: hidden; }
+  .cat .c-ic img { width: 100%; height: 100%; object-fit: cover; border-radius: 16px; display: block; }
   .cat .c-nm { display: block; font-size: 12px; color: #6B675F; margin-top: 6px; }
   .cat.active .c-ic { background: #8B2E2E; }
   .cat.active .c-nm { color: #8B2E2E; font-weight: 600; }
@@ -122,6 +123,10 @@
   .d-img { width: 100%; height: 240px; background: #E7DEDC; display: flex;
            align-items: center; justify-content: center; color: #fff; font-size: 48px; }
   .d-img img { width: 100%; height: 100%; object-fit: cover; }
+  .d-thumbs { display: flex; gap: 6px; padding: 10px 16px 0; }
+  .d-thumb { width: 56px; height: 56px; border-radius: 10px; overflow: hidden; border: 2px solid transparent; cursor: pointer; flex-shrink: 0; }
+  .d-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .d-thumb.on { border-color: #8B2E2E; }
   .d-info { background: #fff; padding: 16px; }
   .d-name { font-size: 18px; font-weight: 700; }
   .d-price { color: #8B2E2E; font-size: 24px; font-weight: 700; margin-top: 8px; }
@@ -235,6 +240,7 @@
       </div>
       <div class="detail-body">
         <div class="d-img" id="d-img"></div>
+        <div id="d-thumbs-box"></div>
         <div class="d-info">
           <div class="d-name" id="d-name"></div>
           <div id="d-price-box"></div>
@@ -629,8 +635,13 @@ function renderCats() {
   const box = document.getElementById('cats');
   let html = '<div class="cat ' + (activeCat===''?'active':'') + '" onclick="setCat(\'\')">' +
                 '<div class="c-ic">🛒</div><div class="c-nm">全部</div></div>';
-  html += cats.map(c => '<div class="cat ' + (activeCat===c.id?'active':'') + '" onclick="setCat(\'' + esc(c.id) + '\')">' +
-                '<div class="c-ic">' + esc(c.icon||'🏷️') + '</div><div class="c-nm">' + esc(c.name) + '</div></div>').join('');
+  html += cats.map(c => {
+    const ic = c.iconImg
+      ? '<img src="' + esc(c.iconImg) + '" alt=""/>'
+      : esc(c.icon || '🏷️');
+    return '<div class="cat ' + (activeCat===c.id?'active':'') + '" onclick="setCat(\'' + esc(c.id) + '\')">' +
+                '<div class="c-ic">' + ic + '</div><div class="c-nm">' + esc(c.name) + '</div></div>';
+  }).join('');
   box.innerHTML = html;
 }
 function setCat(id) { activeCat = id; renderCats(); renderProducts(); }
@@ -671,19 +682,32 @@ function renderProducts() {
 function openDetail(id) {
   const p = (DATA.products || []).find(x => x.id === id);
   if (!p) return;
-  const img = (p.images && p.images[0])
-    ? '<img src="' + esc(p.images[0]) + '" alt=""/>'
+  const imgs = p.images || [];
+  const first = imgs[0]
+    ? '<img src="' + esc(imgs[0]) + '" alt=""/>'
     : '<span>' + esc(catIcon(p.categoryId)) + '</span>';
+  let thumbs = '';
+  if (imgs.length > 1) {
+    thumbs = '<div class="d-thumbs">' + imgs.map((u, k) =>
+      '<div class="d-thumb ' + (k === 0 ? 'on' : '') + '" onclick="switchDetailImg(this,\'' + esc(u) + '\')"><img src="' + esc(u) + '" alt=""/></div>'
+    ).join('') + '</div>';
+  }
   const priceHtml = (p.price > 0)
     ? '<span class="d-price"><span class="cny">¥</span>' + p.price + '<span style="font-size:13px;font-weight:400"> /' + esc(p.unit||'件') + '</span></span>'
     : '<span class="d-price ask">面议</span>';
-  document.getElementById('d-img').innerHTML = img;
+  document.getElementById('d-img').innerHTML = first;
+  document.getElementById('d-thumbs-box').innerHTML = thumbs;
   document.getElementById('d-name').textContent = p.name;
   document.getElementById('d-price-box').innerHTML = priceHtml;
   document.getElementById('d-spec').textContent = p.spec || '';
   document.getElementById('d-tags').innerHTML = (p.tags || []).map(t => '<span>' + esc(t) + '</span>').join('');
   document.getElementById('d-desc').textContent = p.desc || '暂无介绍';
   document.getElementById('detail').classList.add('show');
+}
+function switchDetailImg(el, url) {
+  document.getElementById('d-img').innerHTML = '<img src="' + esc(url) + '" alt=""/>';
+  const ch = document.querySelectorAll('.d-thumb');
+  for (let i = 0; i < ch.length; i++) ch[i].classList.toggle('on', ch[i] === el);
 }
 function closeDetail() { document.getElementById('detail').classList.remove('show'); }
 
