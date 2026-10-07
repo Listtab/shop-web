@@ -43,10 +43,11 @@
          border-radius: 10px; padding: 11px; cursor: pointer; font-size: 13px; margin-top: 4px; }
   .add:hover { border-color: #8B2E2E; color: #8B2E2E; background: #FDF7F7; }
 
-  /* 工具栏 */
-  .bar { position: fixed; left: 0; right: 0; bottom: 0; background: #fff;
-         border-top: 1px solid #EFEDE8; padding: 12px 20px; display: flex; gap: 10px;
-         align-items: center; justify-content: center; box-shadow: 0 -2px 12px rgba(0,0,0,.06); }
+  /* 底部提示 toast（替代原保存栏） */
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 99;
+           background: rgba(44,43,41,.94); color: #fff; font-size: 13px; padding: 10px 16px;
+           border-radius: 999px; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 90%; text-align: center; }
+  .toast.show { opacity: 1; }
   .btn { border: none; border-radius: 999px; padding: 11px 26px; font-size: 14px; cursor: pointer; }
   .btn-p { background: #8B2E2E; color: #fff; }
   .btn-p:hover { background: #7A2626; }
@@ -75,13 +76,32 @@
   .imgrow input[type=text] { flex: 1; }
   .mini { padding: 7px 12px; font-size: 12px; white-space: nowrap; }
   #cos-cfg .hint { font-size: 12px; }
+
+  /* 分类展开式管理 */
+  .catcard { border: 1px solid #EFEDE8; border-radius: 14px; margin-bottom: 12px; background: #fff; overflow: hidden; }
+  .cc-head { display: flex; align-items: center; gap: 10px; padding: 13px 14px; cursor: pointer; background: #FBF7F4; }
+  .cc-ic { width: 34px; height: 34px; border-radius: 10px; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 18px; overflow: hidden; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+  .cc-ic img { width: 100%; height: 100%; object-fit: cover; }
+  .cc-name { font-size: 15px; font-weight: 600; flex: 1; min-width: 0; }
+  .cc-count { font-size: 12px; color: #9A938A; }
+  .cc-arrow { color: #B4B2A9; transition: transform .2s; font-size: 12px; }
+  .catcard.collapsed .cc-arrow { transform: rotate(-90deg); }
+  .catcard.collapsed .cc-body { display: none; }
+  .cc-body { padding: 12px 14px 14px; border-top: 1px solid #F0EEEA; }
+  .cc-edit { padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px dashed #EDEAE4; }
+  .cc-prods { display: flex; flex-direction: column; gap: 10px; }
+  .prodcard { border: 1px solid #EFEDE8; border-radius: 12px; padding: 12px; background: #FCFBFA; }
+  .pc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .pc-idx { font-size: 13px; font-weight: 600; color: #2C2B29; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .empty-mini { font-size: 12px; color: #9A938A; padding: 6px 2px; }
+  .mini-add { width: auto; display: inline-block; padding: 8px 14px; margin-top: 4px; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <h1>网页版后台 <span id="mode-tag" class="mode-tag"></span></h1>
-  <div class="sub">改完点下方「保存」；要让顾客看到，在下面「发布到网上」推送到你的仓库 / COS。<br/>
-  本页既能连本地服务器用，也能作为<b>静态网页直接部署</b>到 GitHub Pages / Gitee / 腾讯云 COS 上使用。</div>
+  <div class="sub">改完在下面「发布到网上」推送到 GitHub / COS，顾客就能看到。<br/>
+  本页既能连本地服务器用，也能作为<b>静态网页直接部署</b>到 GitHub Pages / 腾讯云 COS 上使用。</div>
 
   <div class="sec">
     <h2>店铺信息</h2>
@@ -110,39 +130,31 @@
   </div>
 
   <div class="sec">
-    <h2>商品分类</h2>
-    <div class="hint">图标优先填「图标图片地址」（圆角显示，更统一）；留空时再用下面的 emoji 兜底。</div>
-    <div id="cat-list"></div>
+    <h2>商品管理（按分类）</h2>
+    <div class="hint">点分类标题可展开 / 收起；在分类里直接增删改商品，每件最多 3 张图。图片「选图上传」直传 GitHub 仓库。</div>
+    <div id="manage-list"></div>
     <button class="add" onclick="addCat()">+ 新增分类</button>
-  </div>
-
-  <div class="sec">
-    <h2>商品</h2>
-    <div class="hint">四项必填：图片、分类、名称、价格。价格填 0 顾客看到「面议」</div>
-    <div id="prod-list"></div>
-    <button class="add" onclick="addProd()">+ 新增商品</button>
   </div>
 
   <div class="sec cfg">
     <details>
       <summary>发布到网上（让所有顾客看到）</summary>
       <div class="tip">本地改只是改你电脑/浏览器里的文件。要让所有顾客看到，要把 <code>data.json</code> 发到网上。<br/>
-      <b>GitHub Pages / Gitee 码云</b>：免费，本页直接用浏览器把文件推送到你的仓库（接口已确认允许跨域）。<br/>
-      <b>腾讯云 COS</b>：国内最稳、微信秒开；先在下方填好 COS 设置，「推送并发布」会把 <code>data.json</code> 传到 COS，图片「选图上传」也会直接存到 COS。<br/>
+      <b>GitHub Pages</b>：免费，本页直接用浏览器把文件推送到你的仓库（接口已确认允许跨域）；图片「选图上传」也直接存进仓库。<br/>
+      <b>腾讯云 COS</b>：国内最稳、微信秒开；选它并在下方填好 COS 设置后，「推送并发布」和「选图上传」都走 COS（暂不展开）。<br/>
       选好平台、填好对应信息后，点「推送并发布」即可。</div>
       <div class="field" style="margin-top:14px"><label>平台</label>
-        <select id="gy-platform">
+        <select id="gy-platform" onchange="onPlatformChange()">
           <option value="github">GitHub Pages</option>
-          <option value="gitee">Gitee 码云</option>
           <option value="cos">腾讯云 COS</option>
         </select>
       </div>
       <div class="grid2" style="margin-top:12px">
-        <div class="field"><label>用户名</label><input type="text" id="gy-owner" placeholder="GitHub / Gitee 用户名"/></div>
+        <div class="field"><label>用户名</label><input type="text" id="gy-owner" placeholder="GitHub 用户名"/></div>
         <div class="field"><label>仓库名</label><input type="text" id="gy-repo" placeholder="例如 shop-web"/></div>
       </div>
-      <div class="field"><label>私人令牌</label><input type="password" id="gy-token" placeholder="GitHub: repo 权限 PAT；Gitee: 私人令牌"/></div>
-      <div id="cos-cfg" style="margin-top:14px;border-top:1px dashed #E0DDD6;padding-top:12px">
+      <div class="field"><label>私人令牌</label><input type="password" id="gy-token" placeholder="GitHub: repo 权限 PAT"/></div>
+      <div id="cos-cfg" style="display:none;margin-top:14px;border-top:1px dashed #E0DDD6;padding-top:12px">
         <div class="hint" style="margin-bottom:10px">选「腾讯云 COS」时填下面四项：建一个「公有读私有写」存储桶，并部署一个签发临时上传地址的云函数（代码我用单独文件给你）。图片「选图上传」和「推送并发布」都会走 COS。</div>
         <div class="grid2">
           <div class="field"><label>存储桶 Bucket</label><input type="text" id="cos-bucket" placeholder="例如 shop-1250000000"/></div>
@@ -161,10 +173,7 @@
   </div>
 </div>
 
-<div class="bar">
-  <button class="btn btn-p" onclick="save()">保存</button>
-  <span class="msg" id="msg"></span>
-</div>
+<div id="toast" class="toast"></div>
 
 <script>
 let D = null;
@@ -187,17 +196,20 @@ function renderModeTag() {
 }
 
 function renderAll() {
-  renderProfile(); renderBanners(); renderCats(); renderProds();
+  renderProfile(); renderBanners(); renderManage();
   const o = localStorage.getItem('gy_owner'), r = localStorage.getItem('gy_repo');
   if (o) document.getElementById('gy-owner').value = o;
   if (r) document.getElementById('gy-repo').value = r;
   loadCosCfgInputs();
+  onPlatformChange();
 }
 
 function msg(t, bad) {
-  const e = document.getElementById('msg');
-  e.textContent = t; e.className = 'msg ' + (bad ? 'err' : 'ok');
-  setTimeout(() => { if (e.textContent === t) e.textContent = ''; }, 5000);
+  const e = document.getElementById('toast');
+  if (!e) return;
+  e.textContent = t; e.classList.add('show');
+  clearTimeout(msg._t);
+  msg._t = setTimeout(() => e.classList.remove('show'), 3500);
 }
 
 function esc(s) {
@@ -258,47 +270,98 @@ function mvBanner(i, d) {
   renderBanners();
 }
 
-/* ---------- 分类 ---------- */
-function renderCats() {
-  const box = document.getElementById('cat-list');
-  box.innerHTML = (D.categories || []).map((c, i) => `
-    <div class="item">
-      <div class="item-top">
-        <span class="item-idx">第 ${i + 1} 个</span>
+/* ---------- 分类（展开式管理） ---------- */
+function renderManage() {
+  const box = document.getElementById('manage-list');
+  if (!box) return;
+  const cats = (D.categories || []).slice().sort((a, b) => (a.sort || 0) - (b.sort || 0));
+  let html = '';
+  cats.forEach(c => { html += categoryCardHtml(c); });
+  const uncat = (D.products || []).filter(p => !p.categoryId || !cats.find(c => c.id === p.categoryId));
+  if (uncat.length) html += uncatCardHtml(uncat);
+  box.innerHTML = html;
+}
+function categoryCardHtml(c) {
+  const products = (D.products || []).filter(p => p.categoryId === c.id);
+  const ic = c.iconImg ? `<img src="${esc(c.iconImg)}" alt=""/>` : esc(c.icon || '🏷️');
+  const body = `
+    <div class="cc-edit">
+      <div class="row">
+        <div class="field" style="max-width:80px"><label>图标</label>
+          <input type="text" value="${esc(c.icon)}" oninput="setCatField('${c.id}','icon',this.value)"/></div>
+        <div class="field"><label>分类名称</label>
+          <input type="text" value="${esc(c.name)}" oninput="setCatField('${c.id}','name',this.value)"/></div>
+        <label class="chk-line"><input type="checkbox" ${c.onSale ? 'checked' : ''} onchange="setCatField('${c.id}','onSale',this.checked)"/>上架</label>
         <span class="acts">
-          <button class="mv" onclick="mvCat(${i},-1)">↑</button>
-          <button class="mv" onclick="mvCat(${i},1)">↓</button>
-          <button class="del" onclick="delCat(${i})">删除</button>
+          <button class="mv" onclick="mvCat('${c.id}',-1)">↑</button>
+          <button class="mv" onclick="mvCat('${c.id}',1)">↓</button>
+          <button class="del" onclick="delCat('${c.id}')">删除</button>
         </span>
       </div>
-      <div class="row">
-        <div class="field" style="max-width:88px"><label>图标 emoji</label>
-          <input type="text" value="${esc(c.icon)}" oninput="D.categories[${i}].icon=this.value"/></div>
-        <div class="field"><label>分类名称</label>
-          <input type="text" value="${esc(c.name)}" oninput="D.categories[${i}].name=this.value"/></div>
-        <label class="chk-line"><input type="checkbox" ${c.onSale ? 'checked' : ''}
-          onchange="D.categories[${i}].onSale=this.checked"/>上架</label>
+      <div class="field" style="margin-top:8px"><label>图标图片地址（留空用上面 emoji）</label>
+        <input type="text" value="${esc(c.iconImg || '')}" oninput="setCatField('${c.id}','iconImg',this.value)" placeholder="https://.../cat.png"/></div>
+    </div>
+    <div class="cc-prods">
+      ${products.map(p => productCardHtml(D.products.indexOf(p))).join('')}
+      ${products.length ? '' : '<div class="empty-mini">（暂无商品）</div>'}
+      <button class="add mini-add" onclick="addProdTo('${c.id}')">+ 新增商品到「${esc(c.name)}」</button>
+    </div>`;
+  return `
+    <div class="catcard" id="card-${c.id}">
+      <div class="cc-head" onclick="toggleCat('${c.id}')">
+        <span class="cc-ic">${ic}</span>
+        <span class="cc-name" id="ccname-${c.id}">${esc(c.name)}</span>
+        <span class="cc-count">${products.length} 件</span>
+        <span class="cc-arrow">▾</span>
       </div>
-      <div class="field"><label>图标图片地址（留空则用上面的 emoji）</label>
-        <input type="text" value="${esc(c.iconImg || '')}" oninput="D.categories[${i}].iconImg=this.value" placeholder="https://.../cat.png"/></div>
-    </div>`).join('');
+      <div class="cc-body">${body}</div>
+    </div>`;
+}
+function uncatCardHtml(list) {
+  const body = `
+    <div class="cc-prods">
+      ${list.map(p => productCardHtml(D.products.indexOf(p))).join('')}
+      <div class="empty-mini">这些商品还没选分类，可在商品卡里「商品分类」下拉归到某类。</div>
+    </div>`;
+  return `
+    <div class="catcard" id="card-uncat">
+      <div class="cc-head" onclick="toggleCat('uncat')">
+        <span class="cc-ic">🏷️</span>
+        <span class="cc-name">未分类</span>
+        <span class="cc-count">${list.length} 件</span>
+        <span class="cc-arrow">▾</span>
+      </div>
+      <div class="cc-body">${body}</div>
+    </div>`;
+}
+function setCatField(id, key, val) {
+  const c = (D.categories || []).find(x => x.id === id); if (!c) return;
+  c[key] = val;
+  if (key === 'name') { const e = document.getElementById('ccname-' + id); if (e) e.textContent = val || '未命名'; }
 }
 function addCat() {
-  D.categories.push({ id: 'cat_' + Date.now(), name: '新分类', icon: '🏷️', iconImg: '', onSale: true, sort: D.categories.length + 1 });
-  renderCats();
+  const c = { id: 'cat_' + Date.now(), name: '新分类', icon: '🏷️', iconImg: '', onSale: true, sort: (D.categories || []).length + 1 };
+  D.categories.push(c);
+  renderManage();
+  setTimeout(() => { const el = document.getElementById('card-' + c.id); if (el) el.classList.remove('collapsed'); }, 0);
 }
-function delCat(i) {
-  const id = D.categories[i].id;
+function delCat(id) {
+  const i = (D.categories || []).findIndex(c => c.id === id); if (i < 0) return;
   if (!confirm('删除这个分类？原本属于它的商品会变成「未分类」。')) return;
   D.categories.splice(i, 1);
-  D.products.forEach(p => { if (p.categoryId === id) p.categoryId = ''; });
-  renderCats(); renderProds();
+  (D.products || []).forEach(p => { if (p.categoryId === id) p.categoryId = ''; });
+  renderManage();
 }
-function mvCat(i, d) {
-  const j = i + d; if (j < 0 || j >= D.categories.length) return;
-  const t = D.categories[i]; D.categories[i] = D.categories[j]; D.categories[j] = t;
-  D.categories.forEach((c, k) => c.sort = k + 1);
-  renderCats();
+function mvCat(id, dir) {
+  const cats = D.categories; const i = cats.findIndex(c => c.id === id); if (i < 0) return;
+  const j = i + dir; if (j < 0 || j >= cats.length) return;
+  const t = cats[i]; cats[i] = cats[j]; cats[j] = t;
+  cats.forEach((c, k) => c.sort = k + 1);
+  renderManage();
+}
+function toggleCat(id) {
+  const el = document.getElementById('card-' + id);
+  if (el) el.classList.toggle('collapsed');
 }
 
 /* ---------- 商品 ---------- */
@@ -306,77 +369,81 @@ function catOptions(sel) {
   return (D.categories || []).map(c =>
     `<option value="${esc(c.id)}" ${c.id === sel ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
 }
-function renderProds() {
-  const box = document.getElementById('prod-list');
-  box.innerHTML = (D.products || []).map((p, i) => {
-    const imgs = p.images || [];
-    let slots = '';
-    for (let s = 0; s < 3; s++) {
-      const v = imgs[s] || '';
-      slots += `
-        <div class="imgslot">
-          <div class="imgprev" id="prev-${i}-${s}">${v ? `<img src="${esc(v)}" alt=""/>` : '<span>第 ' + (s + 1) + ' 张（可选）</span>'}</div>
-          <div class="imgrow">
-            <button type="button" class="btn btn-s mini" onclick="pickImg(${i},${s})">选图上传</button>
-            <input type="text" placeholder="或粘贴图片网址" value="${esc(v)}" oninput="setImg(${i},${s},this.value)"/>
-          </div>
-          <input type="file" accept="image/*" id="file-${i}-${s}" style="display:none" onchange="onPickImg(${i},${s},this)"/>
-        </div>`;
-    }
-    return `
-    <div class="item">
-      <div class="item-top">
-        <span class="item-idx">第 ${i + 1} 件</span>
+function productCardHtml(gi) {
+  const p = D.products[gi]; if (!p) return '';
+  const imgs = p.images || [];
+  let slots = '';
+  for (let s = 0; s < 3; s++) {
+    const v = imgs[s] || '';
+    slots += `
+      <div class="imgslot">
+        <div class="imgprev" id="prev-${gi}-${s}">${v ? `<img src="${esc(v)}" alt=""/>` : '<span>第 ' + (s + 1) + ' 张（可选）</span>'}</div>
+        <div class="imgrow">
+          <button type="button" class="btn btn-s mini" onclick="pickImg(${gi},${s})">选图上传</button>
+          <input type="text" placeholder="或粘贴图片网址" value="${esc(v)}" oninput="setImg(${gi},${s},this.value)"/>
+        </div>
+        <input type="file" accept="image/*" id="file-${gi}-${s}" style="display:none" onchange="onPickImg(${gi},${s},this)"/>
+      </div>`;
+  }
+  return `
+    <div class="prodcard">
+      <div class="pc-top">
+        <span class="pc-idx" id="pcidx-${gi}">${esc(p.name || '未命名')}</span>
         <span class="acts">
-          <button class="mv" onclick="mvProd(${i},-1)">↑</button>
-          <button class="mv" onclick="mvProd(${i},1)">↓</button>
-          <button class="del" onclick="delProd(${i})">删除</button>
+          <button class="mv" onclick="mvProdInCat(${gi},-1)">↑</button>
+          <button class="mv" onclick="mvProdInCat(${gi},1)">↓</button>
+          <button class="del" onclick="delProd(${gi})">删除</button>
         </span>
       </div>
-      <div class="hint" style="margin-bottom:8px">商品图片（最多 3 张，第 1 张为封面；可「选图上传」直传 COS，或粘贴图片网址）</div>
+      <div class="hint" style="margin-bottom:6px">商品图片（最多 3 张，第 1 张为封面；可「选图上传」直传 GitHub，或粘贴图片网址）</div>
       ${slots}
       <div class="row">
         <div class="field"><label>商品分类</label>
-          <select onchange="D.products[${i}].categoryId=this.value">${catOptions(p.categoryId)}</select></div>
+          <select onchange="D.products[${gi}].categoryId=this.value;renderManage()">${catOptions(p.categoryId)}</select></div>
         <div class="field"><label>价格（填 0 = 面议）</label>
-          <input type="number" min="0" value="${p.price || 0}" oninput="D.products[${i}].price=+this.value"/></div>
+          <input type="number" min="0" value="${p.price || 0}" oninput="D.products[${gi}].price=+this.value"/></div>
         <div class="field" style="max-width:90px"><label>单位</label>
-          <input type="text" value="${esc(p.unit)}" oninput="D.products[${i}].unit=this.value"/></div>
-        <label class="chk-line"><input type="checkbox" ${p.onSale ? 'checked' : ''}
-          onchange="D.products[${i}].onSale=this.checked"/>上架</label>
+          <input type="text" value="${esc(p.unit)}" oninput="D.products[${gi}].unit=this.value"/></div>
+        <label class="chk-line"><input type="checkbox" ${p.onSale ? 'checked' : ''} onchange="D.products[${gi}].onSale=this.checked"/>上架</label>
       </div>
       <div class="field"><label>商品名称</label>
-        <input type="text" value="${esc(p.name)}" oninput="D.products[${i}].name=this.value"/></div>
+        <input type="text" value="${esc(p.name)}" oninput="D.products[${gi}].name=this.value;const e=document.getElementById('pcidx-${gi}');if(e)e.textContent=this.value||'未命名'"/></div>
       <div class="grid2">
         <div class="field"><label>规格（可不填）</label>
-          <input type="text" value="${esc(p.spec)}" oninput="D.products[${i}].spec=this.value"/></div>
+          <input type="text" value="${esc(p.spec)}" oninput="D.products[${gi}].spec=this.value"/></div>
         <div class="field"><label>标签（多个用逗号隔开）</label>
-          <input type="text" value="${esc((p.tags || []).join(','))}"
-            oninput="D.products[${i}].tags=this.value?this.value.split(',').map(s=>s.trim()).filter(Boolean):[]"/></div>
+          <input type="text" value="${esc((p.tags || []).join(','))}" oninput="D.products[${gi}].tags=this.value?this.value.split(',').map(s=>s.trim()).filter(Boolean):[]"/></div>
       </div>
       <div class="field"><label>介绍（可不填，换行用 | 隔开）</label>
         <textarea rows="2" style="width:100%;padding:9px 11px;border:1px solid #E3E0D9;border-radius:9px;font:14px inherit;"
-          oninput="D.products[${i}].desc=this.value.replace(/\|/g,'\\n')">${esc((p.desc || '').replace(/\n/g, '|'))}</textarea></div>
+          oninput="D.products[${gi}].desc=this.value.replace(/\|/g,'\\n')">${esc((p.desc || '').replace(/\n/g, '|'))}</textarea></div>
     </div>`;
-  }).join('');
 }
-function addProd() {
+function addProdTo(catId) {
   D.products.push({
-    id: 'p_' + Date.now(), name: '新商品', categoryId: (D.categories[0] || {}).id || '',
+    id: 'p_' + Date.now(), name: '新商品', categoryId: catId,
     price: 0, unit: '瓶', spec: '', desc: '', images: [], tags: [],
-    onSale: true, sort: D.products.length + 1
+    onSale: true, sort: (D.products || []).length + 1
   });
-  renderProds();
+  renderManage();
 }
-function delProd(i) {
-  if (!confirm('删除「' + D.products[i].name + '」？')) return;
-  D.products.splice(i, 1); renderProds();
+function delProd(gi) {
+  if (!confirm('删除「' + (D.products[gi] ? D.products[gi].name : '') + '」？')) return;
+  D.products.splice(gi, 1); renderManage();
 }
-function mvProd(i, d) {
-  const j = i + d; if (j < 0 || j >= D.products.length) return;
-  const t = D.products[i]; D.products[i] = D.products[j]; D.products[j] = t;
-  D.products.forEach((p, k) => p.sort = k + 1);
-  renderProds();
+function mvProdInCat(gi, dir) {
+  const p = D.products[gi]; if (!p) return;
+  const catId = p.categoryId;
+  const idxs = [];
+  D.products.forEach((x, k) => { if (x.categoryId === catId) idxs.push(k); });
+  const pos = idxs.indexOf(gi);
+  const nj = pos + dir;
+  if (nj < 0 || nj >= idxs.length) return;
+  const a = idxs[pos], b = idxs[nj];
+  const t = D.products[a]; D.products[a] = D.products[b]; D.products[b] = t;
+  idxs.sort((x, y) => x - y);
+  idxs.forEach((k, m) => { D.products[k].sort = m + 1; });
+  renderManage();
 }
 
 /* ---------- 商品图片：最多 3 张，上传到 COS ---------- */
@@ -397,6 +464,11 @@ async function onPickImg(i, s, input) {
   input.value = '';
 }
 async function uploadImage(file) {
+  const platform = document.getElementById('gy-platform').value;
+  if (platform === 'cos') return uploadImageCos(file);
+  return uploadImageGitHub(file);
+}
+async function uploadImageCos(file) {
   const cfg = readCosCfg();
   if (!cfg.ok) { msg(cfg.err, true); return null; }
   msg('正在上传图片…');
@@ -411,6 +483,35 @@ async function uploadImage(file) {
     msg('图片已上传到 COS');
     return url;
   } catch (e) { msg('上传失败：' + e.message, true); return null; }
+}
+async function uploadImageGitHub(file) {
+  const cfg = readCfg();
+  if (!cfg.ok) { msg(cfg.err, true); return null; }
+  msg('正在上传图片到 GitHub…');
+  try {
+    const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+    const path = 'images/' + Date.now() + '_' + Math.floor(Math.random() * 1e6) + '.' + ext;
+    const content = await fileToBase64(file);
+    const h = { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
+    const url = 'https://api.github.com/repos/' + encodeURIComponent(cfg.owner) + '/' + encodeURIComponent(cfg.repo) + '/contents/' + path;
+    let sha = '';
+    try { const g = await fetch(url, { headers: h }); if (g.ok) { const j = await g.json(); sha = j.sha || ''; } } catch (e) {}
+    const body = { message: '上传图片 ' + path, content: content };
+    if (sha) body.sha = sha;
+    const r = await fetch(url, { method: 'PUT', headers: h, body: JSON.stringify(body) });
+    if (!r.ok) { const j = await r.json().catch(() => ({})); msg('上传失败：' + (j.message || 'HTTP ' + r.status), true); return null; }
+    const publicUrl = 'https://' + cfg.owner + '.github.io/' + cfg.repo + '/' + path;
+    msg('图片已上传（Pages 约 1 分钟内可显示）');
+    return publicUrl;
+  } catch (e) { msg('上传失败：' + e.message, true); return null; }
+}
+function fileToBase64(file) {
+  return new Promise((res, rej) => {
+    const fr = new FileReader();
+    fr.onload = () => res(String(fr.result).split(',')[1]);
+    fr.onerror = rej;
+    fr.readAsDataURL(file);
+  });
 }
 async function getSignUrl(cfg, key, method) {
   try {
@@ -633,6 +734,11 @@ function readCfg() {
 function post(url, body) {
   return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
     .then(r => r.json());
+}
+function onPlatformChange() {
+  const v = document.getElementById('gy-platform').value;
+  const cos = document.getElementById('cos-cfg');
+  if (cos) cos.style.display = (v === 'cos') ? '' : 'none';
 }
 </script>
 </body>
