@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>价格批量修改</title>
+<style>
+  * { box-sizing:border-box; }
+  :root { --wine:#8B2E2E; --amber:#C08228; --ink:#2B2724; --ink-2:#6B6259; --ink-3:#A79C90;
+          --line:#E7E0D8; --paper:#F6F4F1; }
+  body { margin:0; padding:16px 14px 96px; background:var(--paper); color:var(--ink);
+         font:14px/1.55 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; }
+  .wrap { max-width:1100px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 3px; }
+  .sub { color:var(--ink-3); font-size:12.5px; margin-bottom:14px; }
+
+  .bar { background:#fff; border:1px solid var(--line); border-radius:12px; padding:12px 14px; margin-bottom:14px; }
+  .bar-row { display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+  input[type=text], input[type=number], select {
+    width:100%; padding:11px 12px; border:1px solid var(--line); border-radius:9px;
+    font-size:16px; font-family:inherit; background:#fff; color:var(--ink); }
+  input:focus, select:focus { outline:none; border-color:var(--wine); }
+  .grow { flex:1; min-width:130px; }
+  .btn { border:none; border-radius:999px; padding:11px 20px; font-size:14px; cursor:pointer; white-space:nowrap; }
+  .btn-p { background:var(--wine); color:#fff; }
+  .btn-s { background:#fff; color:var(--ink-2); border:1px solid var(--line); }
+  .btn-w { background:var(--amber); color:#fff; }
+
+  table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden;
+          border:1px solid var(--line); }
+  th { background:#F3EEE8; font-size:12px; color:var(--ink-2); font-weight:600; text-align:left;
+       padding:10px 10px; white-space:nowrap; }
+  td { padding:9px 10px; border-top:1px solid #F2EDE7; font-size:13.5px; vertical-align:middle; }
+  tr:hover td { background:#FCFAF7; }
+  .t-name { font-weight:500; }
+  .t-sub { font-size:11.5px; color:var(--ink-3); margin-top:2px; }
+  .cell-price { width:104px; }
+  .cell-price input { padding:8px 10px; font-size:15px; text-align:right; }
+  .cell-sel { width:120px; }
+  .cell-sel select { padding:8px 10px; font-size:14px; }
+  .chk { width:17px; height:17px; accent-color:var(--wine); }
+  .cat-tag { font-size:11px; color:var(--wine); background:#F7EDED; border-radius:5px; padding:2px 6px; display:inline-block; }
+  .off-tag { font-size:11px; color:var(--ink-3); background:#F0ECE7; border-radius:5px; padding:2px 6px; display:inline-block; }
+
+  .tools { position:fixed; left:0; right:0; bottom:0; background:#fff; border-top:1px solid var(--line);
+           padding:11px 14px; display:flex; gap:10px; align-items:center; justify-content:center; }
+  .msg { font-size:13px; text-align:center; }
+  .ok { color:#0F6E56; } .err { color:#C0392B; }
+  .hint { font-size:12px; color:var(--ink-3); margin-top:6px; }
+  @media (max-width:640px) {
+    .hide-sm { display:none; }
+    table, tbody, tr, td { display:block; width:100%; }
+    thead { display:none; }
+    tr { border-top:1px solid var(--line); padding:8px 0; }
+    td { border:none; padding:5px 10px; }
+    .cell-price, .cell-sel { width:100%; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>价格批量修改</h1>
+  <div class="sub">只改价格和上下架，改完点底部「保存并发布」。名称/图片请去 <a href="admin.html">商品管理</a> 改。</div>
+
+  <div class="bar">
+    <div class="bar-row">
+      <input type="text" id="kw" class="grow" placeholder="搜索商品名称…" oninput="render()"/>
+      <select id="fcat" class="cell-sel" onchange="render()"></select>
+      <select id="fsort" class="cell-sel" onchange="render()">
+        <option value="sort">按默认排序</option>
+        <option value="asc">价格从低到高</option>
+        <option value="desc">价格从高到低</option>
+      </select>
+      <button class="btn btn-s" onclick="selectAll(true)">全选</button>
+      <button class="btn btn-s" onclick="selectAll(false)">取消</button>
+    </div>
+    <div class="hint" id="cnt"></div>
+    <div class="bar-row" style="margin-top:10px">
+      <input type="number" id="bulkVal" class="grow" placeholder="批量设置价格（留空则不批量）" step="1" min="0"/>
+      <button class="btn btn-w" onclick="bulk('price')">批量改价</button>
+      <button class="btn btn-w" onclick="bulk('minus')">批量降价</button>
+      <input type="number" id="bulkCut" class="grow" placeholder="降多少元" step="1" min="0"/>
+      <button class="btn btn-w" onclick="bulk('plus')">批量加价</button>
+      <button class="btn btn-s" onclick="bulk('zero')">设为面议</button>
+    </div>
+    <div class="hint">只对「已勾选」的商品生效；降/加价基于当前价格，不会低于 0。</div>
+  </div>
+
+  <table>
+    <thead><tr>
+      <th style="width:40px"><input type="checkbox" class="chk" id="all" onchange="selectAll(this.checked)"/></th>
+      <th>商品</th>
+      <th class="hide-sm">分类</th>
+      <th style="width:110px">价格</th>
+      <th style="width:78px">上架</th>
+    </tr></thead>
+    <tbody id="tb"></tbody>
+  </table>
+</div>
+
+<div class="tools">
+  <button class="btn btn-p" onclick="save()">保存并发布</button>
+  <button class="btn btn-s" onclick="location.href='admin.html'">返回后台</button>
+  <span class="msg" id="msg"></span>
+</div>
+
+<script>
+let D = null;
+const GH_DEFAULT = { owner: 'Listtab', repo: 'shop-web' };
+
+fetch('./data.json?_t=' + Date.now())
+  .then(r => r.json()).then(d => { D = d; init(); })
+  .catch(() => msg('读不到 data.json', true));
+
+function init() {
+  D.products = D.products || [];
+  D.categories = D.categories || [];
+  const sel = document.getElementById('fcat');
+  sel.innerHTML = '<option value="">全部分类</option>' +
+    D.categories.map(c => '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>').join('');
+  render();
+}
+function esc(s) { return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function msg(t, bad) {
+  const e = document.getElementById('msg');
+  e.textContent = t; e.className = 'msg ' + (bad ? 'err' : 'ok');
+  setTimeout(() => { if (e.textContent === t) e.textContent = ''; }, 4000);
+}
+function catName(id) { const c = D.categories.find(x => x.id === id); return c ? c.name : '未分类'; }
+
+function render() {
+  const kw = (document.getElementById('kw').value || '').trim().toLowerCase();
+  const fc = document.getElementById('fcat').value;
+  const so = document.getElementById('fsort').value;
+  let list = D.products.slice();
+  if (fc) list = list.filter(p => p.categoryId === fc);
+  if (kw) list = list.filter(p => (p.name || '').toLowerCase().indexOf(kw) > -1);
+  if (so === 'asc') list.sort((a, b) => (a.price || 0) - (b.price || 0));
+  else if (so === 'desc') list.sort((a, b) => (b.price || 0) - (a.price || 0));
+  else list.sort((a, b) => (a.sort || 0) - (b.sort || 0));
+
+  document.getElementById('cnt').textContent =
+    '共 ' + list.length + ' 件' + (fc ? '（' + esc(catName(fc)) + '）' : '') + ' · 勾选 ' + selCount() + ' 件';
+
+  document.getElementById('tb').innerHTML = list.map(p => `
+    <tr>
+      <td><input type="checkbox" class="chk" data-id="${esc(p.id)}" ${isSel(p.id) ? 'checked' : ''} onchange="togSel('${esc(p.id)}',this.checked)"/></td>
+      <td>
+        <div class="t-name">${esc(p.name || '未命名')}</div>
+        <div class="t-sub">${esc(p.spec || '')}</div>
+      </td>
+      <td class="hide-sm">${p.onSale !== false ? '<span class="cat-tag">' + esc(catName(p.categoryId)) + '</span>' : '<span class="off-tag">已下架</span>'}</td>
+      <td class="cell-price"><input type="number" min="0" step="1" value="${p.price || 0}" onchange="setP('${esc(p.id)}',this.value)"/></td>
+      <td><input type="checkbox" class="chk" ${p.onSale !== false ? 'checked' : ''} onchange="setS('${esc(p.id)}',this.checked)"/></td>
+    </tr>`).join('');
+}
+
+/* 勾选状态放内存，不污染数据 */
+let SEL = new Set();
+function isSel(id) { return SEL.has(id); }
+function togSel(id, on) { if (on) SEL.add(id); else SEL.delete(id); render(); }
+function selCount() { return SEL.size; }
+function selectAll(on) {
+  if (on) D.products.forEach(p => SEL.add(p.id));
+  else SEL.clear();
+  document.getElementById('all').checked = on;
+  render();
+}
+
+function setP(id, v) {
+  const p = D.products.find(x => x.id === id); if (!p) return;
+  p.price = Math.max(0, Math.round(+v || 0));
+}
+function setS(id, on) {
+  const p = D.products.find(x => x.id === id); if (!p) return;
+  p.onSale = on;
+}
+
+/* 批量操作 */
+function bulk(kind) {
+  if (!SEL.size) return msg('请先勾选商品', true);
+  const bv = Math.max(0, Math.round(+document.getElementById('bulkVal').value || 0));
+  const cut = Math.max(0, Math.round(+document.getElementById('bulkCut').value || 0));
+  if ((kind === 'price' || kind === 'minus' || kind === 'plus') && kind !== 'zero' && !bv && !cut) {
+    return msg('请先填写要设置的价格或调整幅度', true);
+  }
+  let n = 0;
+  D.products.forEach(p => {
+    if (!SEL.has(p.id)) return;
+    if (kind === 'price') { p.price = bv; n++; }
+    else if (kind === 'zero') { p.price = 0; n++; }
+    else if (kind === 'minus') { p.price = Math.max(0, (p.price || 0) - cut); n++; }
+    else if (kind === 'plus') { p.price = (p.price || 0) + cut; n++; }
+  });
+  render();
+  msg('已调整 ' + n + ' 件，点底部「保存并发布」生效');
+}
+
+/* ---------- 保存并推送到 GitHub ---------- */
+function loadCfg() {
+  const owner = localStorage.getItem('gy_owner') || GH_DEFAULT.owner;
+  const repo = localStorage.getItem('gy_repo') || GH_DEFAULT.repo;
+  const token = localStorage.getItem('gy_token') || '';
+  return { owner, repo, token };
+}
+function b64(str) { return btoa(unescape(encodeURIComponent(str))); }
+
+async function save() {
+  const cfg = loadCfg();
+  if (!cfg.token) { msg('请先到「发布到网上」填好 GitHub 私人令牌', true); return; }
+  msg('正在保存…');
+  try {
+    const base = 'https://api.github.com/repos/' + encodeURIComponent(cfg.owner) + '/' +
+                 encodeURIComponent(cfg.repo) + '/contents/data.json';
+    const h = { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json', 'Content-Type': 'application/json' };
+    let sha = '';
+    try { const g = await fetch(base, { headers: h }); if (g.ok) { const j = await g.json(); sha = j.sha || ''; } } catch (e) {}
+    const payload = { message: '批量改价 ' + new Date().toLocaleString('zh-CN'), content: b64(JSON.stringify(D, null, 2)) };
+    if (sha) payload.sha = sha;
+    const r = await fetch(base, { method: 'PUT', headers: h, body: JSON.stringify(payload) });
+    const j = await r.json();
+    if (r.status === 200 || r.status === 201) msg('已保存并发布，1 分钟内生效');
+    else msg('保存失败：' + ((j && j.message) || ('HTTP ' + r.status)), true);
+  } catch (e) { msg('保存失败：' + e.message, true); }
+}
+</script>
+</body>
+</html>
