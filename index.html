@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="format-detection" content="telephone=no"/>
 <title>商品展示</title>
 <style>
@@ -68,7 +68,7 @@
   /* ===== 搜索 ===== */
   .search { margin: 12px 16px 0; }
   .search input { width: 100%; background: #fff; border: none; border-radius: 20px;
-                  padding: 10px 16px; font-size: 13px; color: #2C2B29;
+                  padding: 11px 16px; font-size: 16px; color: #2C2B29;
                   box-shadow: 0 1px 6px rgba(0,0,0,.04); }
   .search input:focus { outline: none; }
 
@@ -531,6 +531,7 @@ let DATA = null;
 let activeCat = '';     // 空 = 全部
 let bannerIdx = 0, bannerTimer = null;
 let detailOpen = false;
+let pushedState = false;
 
 /* ============ 取数 ============ */
 async function load() {
@@ -685,7 +686,11 @@ function renderProducts() {
 function openDetail(id) {
   const p = (DATA.products || []).find(x => x.id === id);
   if (!p) return;
-  if (!detailOpen) { detailOpen = true; history.pushState({ shopDetail: true }, ''); }
+  if (!detailOpen) {
+    detailOpen = true;
+    try { history.pushState({ shopDetail: true }, '', '#detail'); pushedState = true; }
+    catch (e) { location.hash = 'detail'; pushedState = true; }
+  }
   const imgs = p.images || [];
   const first = imgs[0]
     ? '<img src="' + esc(imgs[0]) + '" alt=""/>'
@@ -717,14 +722,18 @@ function closeDetail() {
   if (!detailOpen) return;
   detailOpen = false;
   document.getElementById('detail').classList.remove('show');
-  history.back();
+  // 若本页是靠自己压入的历史条目（#detail），退回它，避免多出一条空历史
+  if (pushedState) { pushedState = false; history.back(); }
 }
-window.addEventListener('popstate', function() {
-  if (detailOpen) {
-    detailOpen = false;
-    document.getElementById('detail').classList.remove('show');
-  }
-});
+/* 手机返回键：只关闭详情、停留在商品列表，不会退出网页 */
+function onHistChange() {
+  pushedState = false;
+  if (!detailOpen) return;
+  detailOpen = false;
+  document.getElementById('detail').classList.remove('show');
+}
+window.addEventListener('popstate', onHistChange);
+window.addEventListener('hashchange', onHistChange);
 
 /* ============ tab 切换 ============ */
 function switchTab(tab) {
