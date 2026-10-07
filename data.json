@@ -85,7 +85,9 @@
       "unit": "瓶",
       "spec": "500ml · 酱香型",
       "desc": "茅台酒经典之作，酱香突出、优雅细腻。\n支持验货，假一赔十。",
-      "images": [],
+      "images": [
+        "https://image.suning.cn/uimg/sop/commodity/279989701748433590850500_x.jpg"
+      ],
       "tags": [
         "热销",
         "正品保障"
