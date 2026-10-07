@@ -8,7 +8,7 @@
   * { box-sizing: border-box; }
   body { margin: 0; padding: 28px 20px 80px; background: #F6F4F1; color: #2C2B29;
          font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif; }
-  .wrap { max-width: 860px; margin: 0 auto; }
+  .wrap { max-width: 1180px; margin: 0 auto; }
   h1 { font-size: 22px; margin: 0 0 4px; }
   .sub { color: #8B8378; font-size: 13px; margin-bottom: 24px; }
   .sec { background: #fff; border-radius: 16px; padding: 22px 24px; margin-bottom: 18px;
@@ -72,8 +72,8 @@
   .imgprev { width: 100%; height: 92px; border-radius: 8px; overflow: hidden; background: #EFEDE8;
              display: flex; align-items: center; justify-content: center; color: #B4B2A9; font-size: 12px; }
   .imgprev img { width: 100%; height: 100%; object-fit: cover; }
-  .imgrow { display: flex; gap: 6px; align-items: center; margin-top: 6px; }
-  .imgrow input[type=text] { flex: 1; }
+  .imgrow { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .imgrow .btn { width: 100%; }
   .mini { padding: 7px 12px; font-size: 12px; white-space: nowrap; }
   #cos-cfg .hint { font-size: 12px; }
 
@@ -90,11 +90,42 @@
   .cc-body { padding: 12px 14px 14px; border-top: 1px solid #F0EEEA; }
   .cc-edit { padding-bottom: 10px; margin-bottom: 10px; border-bottom: 1px dashed #EDEAE4; }
   .cc-prods { display: flex; flex-direction: column; gap: 10px; }
-  .prodcard { border: 1px solid #EFEDE8; border-radius: 12px; padding: 12px; background: #FCFBFA; }
-  .pc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-  .pc-idx { font-size: 13px; font-weight: 600; color: #2C2B29; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .empty-mini { font-size: 12px; color: #9A938A; padding: 6px 2px; }
   .mini-add { width: auto; display: inline-block; padding: 8px 14px; margin-top: 4px; }
+
+  /* 商品：紧凑手风琴行（点一行展开编辑） */
+  .prodcard { border: 1px solid #EFEDE8; border-radius: 12px; background: #FCFBFA; margin-bottom: 8px; overflow: hidden; }
+  .prodcard.collapsed .pc-body { display: none; }
+  .pc-head { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; }
+  .pc-head:hover { background: #F7F3F0; }
+  .pc-thumb { width: 44px; height: 44px; border-radius: 9px; overflow: hidden; background: #EFEDE8; flex-shrink: 0;
+              display: flex; align-items: center; justify-content: center; font-size: 20px; color: #B4B2A9; }
+  .pc-thumb img { width: 100%; height: 100%; object-fit: cover; }
+  .pc-name { font-size: 14px; font-weight: 500; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pc-price { font-size: 14px; color: #8B2E2E; font-weight: 700; flex-shrink: 0; }
+  .pc-flag { font-size: 11px; padding: 2px 7px; border-radius: 6px; flex-shrink: 0; }
+  .pc-flag.on { background: #E8F3EC; color: #0F6E56; }
+  .pc-flag.off { background: #F0EEEA; color: #9A938A; }
+  .pc-arrow { color: #B4B2A9; font-size: 12px; flex-shrink: 0; }
+  .prodcard:not(.collapsed) .pc-arrow { transform: rotate(180deg); }
+  .pc-body { padding: 12px; border-top: 1px dashed #EDEAE4; }
+  .pc-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+
+  /* 顶部可折叠面板（小标题式） */
+  .panel { background: #fff; border-radius: 14px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,.05); overflow: hidden; }
+  .panel-head { display: flex; align-items: center; gap: 10px; padding: 14px 18px; cursor: pointer; background: #FBF7F4; }
+  .panel-head:hover { background: #F7F2EE; }
+  .panel-title { font-size: 15px; font-weight: 600; flex-shrink: 0; }
+  .panel-sum { font-size: 12px; color: #9A938A; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .panel-arrow { color: #B4B2A9; transition: transform .2s; font-size: 12px; flex-shrink: 0; }
+  .panel.collapsed .panel-arrow { transform: rotate(-90deg); }
+  .panel.collapsed .panel-body { display: none; }
+  .panel-body { padding: 16px 18px; border-top: 1px solid #F0EEEA; }
+
+  /* 宽屏：分类两列，减少左右空白 */
+  @media (min-width: 1000px) {
+    #manage-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
+  }
 </style>
 </head>
 <body>
@@ -103,9 +134,14 @@
   <div class="sub">改完在下面「发布到网上」推送到 GitHub / COS，顾客就能看到。<br/>
   本页既能连本地服务器用，也能作为<b>静态网页直接部署</b>到 GitHub Pages / 腾讯云 COS 上使用。</div>
 
-  <div class="sec">
-    <h2>店铺信息</h2>
-    <div class="hint">首页名片卡、联系页都读这里</div>
+  <div class="panel" id="p-profile">
+    <div class="panel-head" onclick="tog('p-profile')">
+      <span class="panel-title">🏪 店铺信息</span>
+      <span class="panel-sum" id="s-profile"></span>
+      <span class="panel-arrow">▾</span>
+    </div>
+    <div class="panel-body">
+      <div class="hint">首页名片卡、联系页都读这里</div>
     <div class="grid2">
       <div class="field"><label>酒庄名称</label><input type="text" id="pf-name"/></div>
       <div class="field"><label>简介 / 一句话</label><input type="text" id="pf-tagline"/></div>
@@ -120,25 +156,41 @@
       <div class="field"><label>营业时间</label><input type="text" id="pf-hours"/></div>
     </div>
     <div class="field"><label>首页公告（留空则不显示公告条）</label><input type="text" id="pf-notice"/></div>
+    </div>
   </div>
 
-  <div class="sec">
-    <h2>顶部轮播图</h2>
-    <div class="hint">不放图片地址就是纯色背景配文字；至少留一张才会有首页横幅</div>
-    <div id="banner-list"></div>
-    <button class="add" onclick="addBanner()">+ 新增一张轮播图</button>
+  <div class="panel collapsed" id="p-banner">
+    <div class="panel-head" onclick="tog('p-banner')">
+      <span class="panel-title">🖼️ 顶部轮播图</span>
+      <span class="panel-sum" id="s-banner"></span>
+      <span class="panel-arrow">▾</span>
+    </div>
+    <div class="panel-body">
+      <div class="hint">不放图片地址就是纯色背景配文字；至少留一张才会有首页横幅</div>
+      <div id="banner-list"></div>      <button class="add" onclick="addBanner()">+ 新增一张轮播图</button>
+    </div>
   </div>
 
-  <div class="sec">
-    <h2>商品管理（按分类）</h2>
-    <div class="hint">点分类标题可展开 / 收起；在分类里直接增删改商品，每件最多 3 张图。图片「选图上传」直传 GitHub 仓库。</div>
-    <div id="manage-list"></div>
-    <button class="add" onclick="addCat()">+ 新增分类</button>
+  <div class="panel" id="p-prod">
+    <div class="panel-head" onclick="tog('p-prod')">
+      <span class="panel-title">🍷 商品管理（按分类）</span>
+      <span class="panel-sum" id="s-prod"></span>
+      <span class="panel-arrow">▾</span>
+    </div>
+    <div class="panel-body">
+      <div class="hint">点分类展开 / 收起；点商品那一行展开编辑详情。每件最多 3 张图，选图上传直传 GitHub。</div>
+      <div id="manage-list"></div>
+      <button class="add" onclick="addCat()">+ 新增分类</button>
+    </div>
   </div>
 
-  <div class="sec cfg">
-    <details>
-      <summary>发布到网上（让所有顾客看到）</summary>
+  <div class="panel collapsed cfg" id="p-pub">
+    <div class="panel-head" onclick="tog('p-pub')">
+      <span class="panel-title">🚀 发布到网上（让顾客看到）</span>
+      <span class="panel-sum" id="s-pub"></span>
+      <span class="panel-arrow">▾</span>
+    </div>
+    <div class="panel-body">
       <div class="tip">本地改只是改你电脑/浏览器里的文件。要让所有顾客看到，要把 <code>data.json</code> 发到网上。<br/>
       <b>GitHub Pages</b>：免费，本页直接用浏览器把文件推送到你的仓库（接口已确认允许跨域）；图片「选图上传」也直接存进仓库。<br/>
       <b>腾讯云 COS</b>：国内最稳、微信秒开；选它并在下方填好 COS 设置后，「推送并发布」和「选图上传」都走 COS（暂不展开）。<br/>
@@ -169,7 +221,7 @@
         <button class="btn btn-s" onclick="download()">下载 data.json</button>
       </div>
       <div class="tip" id="gy-tip"></div>
-    </details>
+    </div>
   </div>
 </div>
 
@@ -202,6 +254,22 @@ function renderAll() {
   if (r) document.getElementById('gy-repo').value = r;
   loadCosCfgInputs();
   onPlatformChange();
+  updSums();
+}
+
+/* ---------- 小标题折叠面板 ---------- */
+function tog(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.toggle('collapsed');
+}
+function setSum(id, t) { const e = document.getElementById(id); if (e) e.textContent = t; }
+function updSums() {
+  const p = D.profile || {};
+  setSum('s-profile', [p.name, p.wechat, p.phone].filter(Boolean).join(' · ') || '未填写');
+  setSum('s-banner', (D.banners || []).length + ' 张轮播');
+  setSum('s-prod', (D.categories || []).length + ' 个分类 · ' + (D.products || []).length + ' 件商品');
+  const v = document.getElementById('gy-platform');
+  setSum('s-pub', v && v.value === 'cos' ? '腾讯云 COS' : 'GitHub Pages');
 }
 
 function msg(t, bad) {
@@ -225,7 +293,7 @@ function renderProfile() {
   .forEach(([k, id]) => {
     const el = document.getElementById(id);
     el.value = p[k] || '';
-    el.oninput = e => { p[k] = e.target.value; };
+    el.oninput = e => { p[k] = e.target.value; updSums(); };
   });
 }
 
@@ -260,9 +328,9 @@ function renderBanners() {
 }
 function addBanner() {
   D.banners.push({ id: 'bn_' + Date.now(), title: '新轮播图', subtitle: '', color: '#8B2E2E', image: '', onSale: true, sort: D.banners.length + 1 });
-  renderBanners();
+  renderBanners(); updSums();
 }
-function delBanner(i) { D.banners.splice(i, 1); renderBanners(); }
+function delBanner(i) { D.banners.splice(i, 1); renderBanners(); updSums(); }
 function mvBanner(i, d) {
   const j = i + d; if (j < 0 || j >= D.banners.length) return;
   const t = D.banners[i]; D.banners[i] = D.banners[j]; D.banners[j] = t;
@@ -342,7 +410,7 @@ function setCatField(id, key, val) {
 function addCat() {
   const c = { id: 'cat_' + Date.now(), name: '新分类', icon: '🏷️', iconImg: '', onSale: true, sort: (D.categories || []).length + 1 };
   D.categories.push(c);
-  renderManage();
+  renderManage(); updSums();
   setTimeout(() => { const el = document.getElementById('card-' + c.id); if (el) el.classList.remove('collapsed'); }, 0);
 }
 function delCat(id) {
@@ -372,6 +440,11 @@ function catOptions(sel) {
 function productCardHtml(gi) {
   const p = D.products[gi]; if (!p) return '';
   const imgs = p.images || [];
+  const cat = (D.categories || []).find(c => c.id === p.categoryId);
+  const thumb = imgs[0]
+    ? '<img src="' + esc(imgs[0]) + '" alt=""/>'
+    : esc((cat && cat.icon) || '🏷️');
+  const priceTxt = p.price > 0 ? ('¥' + p.price + (p.unit ? ' /' + esc(p.unit) : '')) : '面议';
   let slots = '';
   for (let s = 0; s < 3; s++) {
     const v = imgs[s] || '';
@@ -386,38 +459,67 @@ function productCardHtml(gi) {
       </div>`;
   }
   return `
-    <div class="prodcard">
-      <div class="pc-top">
-        <span class="pc-idx" id="pcidx-${gi}">${esc(p.name || '未命名')}</span>
-        <span class="acts">
-          <button class="mv" onclick="mvProdInCat(${gi},-1)">↑</button>
-          <button class="mv" onclick="mvProdInCat(${gi},1)">↓</button>
-          <button class="del" onclick="delProd(${gi})">删除</button>
+    <div class="prodcard collapsed" id="pc-${gi}">
+      <div class="pc-head" onclick="togProd(${gi})">
+        <span class="pc-thumb">${thumb}</span>
+        <span style="flex:1;min-width:0">
+          <span class="pc-name" id="pcn-${gi}">${esc(p.name || '未命名')}</span>
+          <span style="display:block;font-size:12px;color:#9A938A" id="pcs-${gi}">${priceTxt} · ${esc(cat ? cat.name : '未分类')}</span>
         </span>
+        <span class="pc-flag ${p.onSale !== false ? 'on' : 'off'}">${p.onSale !== false ? '上架' : '下架'}</span>
+        <span class="pc-arrow">▾</span>
       </div>
-      <div class="hint" style="margin-bottom:6px">商品图片（最多 3 张，第 1 张为封面；可「选图上传」直传 GitHub，或粘贴图片网址）</div>
-      ${slots}
-      <div class="row">
-        <div class="field"><label>商品分类</label>
-          <select onchange="D.products[${gi}].categoryId=this.value;renderManage()">${catOptions(p.categoryId)}</select></div>
-        <div class="field"><label>价格（填 0 = 面议）</label>
-          <input type="number" min="0" value="${p.price || 0}" oninput="D.products[${gi}].price=+this.value"/></div>
-        <div class="field" style="max-width:90px"><label>单位</label>
-          <input type="text" value="${esc(p.unit)}" oninput="D.products[${gi}].unit=this.value"/></div>
-        <label class="chk-line"><input type="checkbox" ${p.onSale ? 'checked' : ''} onchange="D.products[${gi}].onSale=this.checked"/>上架</label>
+      <div class="pc-body">
+        <div class="pc-top">
+          <span class="item-idx">编辑详情</span>
+          <span class="acts">
+            <button class="mv" onclick="mvProdInCat(${gi},-1)">↑ 上移</button>
+            <button class="mv" onclick="mvProdInCat(${gi},1)">↓ 下移</button>
+            <button class="del" onclick="delProd(${gi})">删除</button>
+          </span>
+        </div>
+        <div class="hint" style="margin-bottom:8px">商品图片（最多 3 张，第 1 张为封面；可「选图上传」直传 GitHub，或粘贴图片网址）</div>
+        ${slots}
+        <div class="row">
+          <div class="field"><label>商品分类</label>
+            <select onchange="D.products[${gi}].categoryId=this.value;renderManage()">${catOptions(p.categoryId)}</select></div>
+          <div class="field"><label>价格（填 0 = 面议）</label>
+            <input type="number" min="0" value="${p.price || 0}" oninput="D.products[${gi}].price=+this.value;updSum(${gi})"/></div>
+          <div class="field" style="max-width:90px"><label>单位</label>
+            <input type="text" value="${esc(p.unit)}" oninput="D.products[${gi}].unit=this.value;updSum(${gi})"/></div>
+          <label class="chk-line"><input type="checkbox" ${p.onSale ? 'checked' : ''} onchange="D.products[${gi}].onSale=this.checked;updFlag(${gi})"/>上架</label>
+        </div>
+        <div class="field"><label>商品名称</label>
+          <input type="text" value="${esc(p.name)}" oninput="D.products[${gi}].name=this.value;updSum(${gi})"/></div>
+        <div class="grid2">
+          <div class="field"><label>规格（可不填）</label>
+            <input type="text" value="${esc(p.spec)}" oninput="D.products[${gi}].spec=this.value"/></div>
+          <div class="field"><label>标签（多个用逗号隔开）</label>
+            <input type="text" value="${esc((p.tags || []).join(','))}" oninput="D.products[${gi}].tags=this.value?this.value.split(',').map(s=>s.trim()).filter(Boolean):[]"/></div>
+        </div>
+        <div class="field"><label>介绍（可不填，换行用 | 隔开）</label>
+          <textarea rows="2" style="width:100%;padding:9px 11px;border:1px solid #E3E0D9;border-radius:9px;font:14px inherit;"
+            oninput="D.products[${gi}].desc=this.value.replace(/\|/g,'\\n')">${esc((p.desc || '').replace(/\n/g, '|'))}</textarea></div>
       </div>
-      <div class="field"><label>商品名称</label>
-        <input type="text" value="${esc(p.name)}" oninput="D.products[${gi}].name=this.value;const e=document.getElementById('pcidx-${gi}');if(e)e.textContent=this.value||'未命名'"/></div>
-      <div class="grid2">
-        <div class="field"><label>规格（可不填）</label>
-          <input type="text" value="${esc(p.spec)}" oninput="D.products[${gi}].spec=this.value"/></div>
-        <div class="field"><label>标签（多个用逗号隔开）</label>
-          <input type="text" value="${esc((p.tags || []).join(','))}" oninput="D.products[${gi}].tags=this.value?this.value.split(',').map(s=>s.trim()).filter(Boolean):[]"/></div>
-      </div>
-      <div class="field"><label>介绍（可不填，换行用 | 隔开）</label>
-        <textarea rows="2" style="width:100%;padding:9px 11px;border:1px solid #E3E0D9;border-radius:9px;font:14px inherit;"
-          oninput="D.products[${gi}].desc=this.value.replace(/\|/g,'\\n')">${esc((p.desc || '').replace(/\n/g, '|'))}</textarea></div>
     </div>`;
+}
+function togProd(gi) {
+  const el = document.getElementById('pc-' + gi);
+  if (el) el.classList.toggle('collapsed');
+}
+function updSum(gi) {
+  const p = D.products[gi]; if (!p) return;
+  const cat = (D.categories || []).find(c => c.id === p.categoryId);
+  const n = document.getElementById('pcn-' + gi);
+  const s = document.getElementById('pcs-' + gi);
+  if (n) n.textContent = p.name || '未命名';
+  if (s) s.textContent = (p.price > 0 ? ('¥' + p.price + (p.unit ? ' /' + p.unit : '')) : '面议') + ' · ' + (cat ? cat.name : '未分类');
+}
+function updFlag(gi) {
+  const p = D.products[gi]; if (!p) return;
+  const card = document.getElementById('pc-' + gi); if (!card) return;
+  const f = card.querySelector('.pc-flag');
+  if (f) { f.textContent = p.onSale !== false ? '上架' : '下架'; f.className = 'pc-flag ' + (p.onSale !== false ? 'on' : 'off'); }
 }
 function addProdTo(catId) {
   D.products.push({
@@ -425,11 +527,11 @@ function addProdTo(catId) {
     price: 0, unit: '瓶', spec: '', desc: '', images: [], tags: [],
     onSale: true, sort: (D.products || []).length + 1
   });
-  renderManage();
+  renderManage(); updSums();
 }
 function delProd(gi) {
   if (!confirm('删除「' + (D.products[gi] ? D.products[gi].name : '') + '」？')) return;
-  D.products.splice(gi, 1); renderManage();
+  D.products.splice(gi, 1); renderManage(); updSums();
 }
 function mvProdInCat(gi, dir) {
   const p = D.products[gi]; if (!p) return;
@@ -539,17 +641,6 @@ function loadCosCfgInputs() {
 function persistCosCfg() {
   [['cos-bucket','cos_bucket'],['cos-region','cos_region'],['cos-scf','cos_scf'],['cos-token','cos_token']]
     .forEach(([id, k]) => { const el = document.getElementById(id); if (el) localStorage.setItem(k, el.value.trim()); });
-}
-
-/* ---------- 保存（两种模式） ---------- */
-function save() {
-  if (HAS_SERVER) {
-    post('/api/save', D).then(d => msg(d.ok ? '已保存到本地服务器，刷新展示页即可看到' : '保存失败：' + d.error, !d.ok));
-    return;
-  }
-  // 静态模式：暂存到本机浏览器，等发布到码云才全网生效
-  try { localStorage.setItem('web_shop_draft', JSON.stringify(D)); } catch (e) {}
-  msg('已暂存在本机浏览器，点下面「推送到码云」让所有人看到');
 }
 
 /* ---------- 发布 / 拉取 / 下载（两种模式） ---------- */
@@ -739,6 +830,7 @@ function onPlatformChange() {
   const v = document.getElementById('gy-platform').value;
   const cos = document.getElementById('cos-cfg');
   if (cos) cos.style.display = (v === 'cos') ? '' : 'none';
+  updSums();
 }
 </script>
 </body>
