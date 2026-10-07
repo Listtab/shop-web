@@ -6,7 +6,7 @@
       "title": "诚源酒庄 · 名酒专场",
       "subtitle": "茅台飞天 53° 现货发售",
       "color": "#8B2E2E",
-      "image": "",
+      "image": "http://q1.qlogo.cn/g?b=qq&nk=1419584363&s=100",
       "onSale": true,
       "sort": 1
     },
@@ -15,7 +15,7 @@
       "title": "节庆礼盒 · 提前订享优惠",
       "subtitle": "五粮液 · 国窖 组合装",
       "color": "#B45309",
-      "image": "",
+      "image": "http://q1.qlogo.cn/g?b=qq&nk=614027306&s=100",
       "onSale": true,
       "sort": 2
     },
@@ -30,22 +30,23 @@
     }
   ],
   "profile": {
-    "name": "永盛酒庄",
-    "tagline": "正品名酒 · 支持验货",
-    "avatar": "",
-    "wechat": "chengyuan-wine",
+    "name": "NNNNNNNNN",
+    "tagline": "NNNNNNNNN",
+    "avatar": "http://q1.qlogo.cn/g?b=qq&nk=1419584363&s=100",
+    "wechat": "NNNNNNNNN",
     "phone": "8888888888888",
-    "address": "XX 市 XX 区中山路 88 号",
-    "hours": "09:00 - 21:30",
-    "notice": "城区内满 500 元免费送货"
+    "address": "NNN",
+    "hours": "NNNNNNNNN",
+    "notice": "NNNNNN"
   },
   "categories": [
     {
       "id": "cat_baijiu",
       "name": "白酒",
-      "icon": "🍶",
+      "icon": "",
       "onSale": true,
-      "sort": 1
+      "sort": 1,
+      "iconImg": "http://q1.qlogo.cn/g?b=qq&nk=1419584363&s=100"
     },
     {
       "id": "cat_hongjiu",
@@ -57,9 +58,10 @@
     {
       "id": "cat_yangjiu",
       "name": "洋酒",
-      "icon": "🥃",
+      "icon": "",
       "onSale": true,
-      "sort": 3
+      "sort": 3,
+      "iconImg": "http://q1.qlogo.cn/g?b=qq&nk=1419584363&s=100"
     },
     {
       "id": "cat_pijiu",
