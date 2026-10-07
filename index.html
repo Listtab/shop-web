@@ -4,8 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
 <meta name="format-detection" content="telephone=no"/>
-<title>商品展示</title>
-<style>
+<title>商品展示</title><style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { margin: 0; padding: 0; }
   body {
@@ -13,8 +12,9 @@
     color: #2C2B29; background: #EDEBE8;
   }
 
-  /* 居中内容列（手机上自然满宽，电脑上收成一条） */
-  .app { max-width: 540px; margin: 0 auto; min-height: 100vh;
+  /* 居中内容列：手机满宽；电脑自动加宽成多列 */
+  :root { --appw: 540px; --cols: 2; }
+  .app { max-width: var(--appw); margin: 0 auto; min-height: 100vh;
          background: #F5F3F0; position: relative; }
 
   /* ===== 顶部轮播 ===== */
@@ -74,8 +74,6 @@
 
   /* ===== 商品网格 ===== */
   .sec-title { margin: 18px 16px 0; font-size: 15px; font-weight: 700; }
-  .grid { display: flex; flex-wrap: wrap; padding: 12px 10px 4px; }
-  .goods { width: 50%; padding: 6px 6px 8px; cursor: pointer; }
   .g-inner { background: #fff; border-radius: 13px; overflow: hidden;
              box-shadow: 0 2px 10px rgba(0,0,0,.05); }
   .g-img { width: 100%; height: 150px; position: relative; display: flex;
@@ -111,7 +109,7 @@
   .contact-line .cl-a { color: #185FA5; flex-shrink: 0; cursor: pointer; }
 
   /* ===== 商品详情 ===== */
-  .detail { position: fixed; top: 0; left: 0; right: 0; bottom: 0; max-width: 540px; margin: 0 auto;
+  .detail { position: fixed; top: 0; left: 0; right: 0; bottom: 0; max-width: var(--appw); margin: 0 auto;
             background: #F5F3F0; z-index: 40; transform: translateX(100%); transition: transform .28s ease;
             display: flex; flex-direction: column; }
   .detail.show { transform: translateX(0); }
@@ -145,7 +143,7 @@
   .bf-wx { background: #F2DEDE; color: #8B2E2E; }
 
   /* ===== 底部 tab ===== */
-  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; max-width: 540px; margin: 0 auto;
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; max-width: var(--appw); margin: 0 auto;
             height: 56px; display: flex; background: #fff; border-top: 1px solid #EFEDE8; }
   .tab { flex: 1; display: flex; flex-direction: column; align-items: center;
          justify-content: center; font-size: 11px; color: #9A938A; cursor: pointer; gap: 2px; }
@@ -157,6 +155,25 @@
            background: rgba(0,0,0,.78); color: #fff; font-size: 13px; padding: 10px 18px;
            border-radius: 10px; z-index: 90; opacity: 0; transition: opacity .2s; pointer-events: none; max-width: 80%; text-align: center; }
   .toast.show { opacity: 1; }
+
+  /* ===== 电脑端自适应：加宽 + 多列，减少左右空白 ===== */
+  @media (min-width: 900px) {
+    :root { --appw: 1000px; --cols: 3; }
+    .banner { height: 240px; }
+    .g-img { height: 190px; }
+    .card-wrap { margin-left: 24px; margin-right: 24px; }
+    .cats, .search, .notice, .sec-title { margin-left: 24px; margin-right: 24px; }
+    .cats { padding-left: 0; padding-right: 0; }
+    .search input { padding: 13px 20px; }
+    .goods { width: 33.333%; padding: 8px 8px 10px; }
+    .list-end { padding-bottom: 40px; }
+  }
+  @media (min-width: 1280px) {
+    :root { --appw: 1240px; --cols: 4; }
+    .g-img { height: 210px; }
+  }
+  .grid { display: flex; flex-wrap: wrap; padding: 12px 10px 4px; }
+  .goods { width: calc(100% / var(--cols)); padding: 6px 6px 8px; cursor: pointer; }
 </style>
 </head>
 <body>
@@ -277,7 +294,7 @@ const FALLBACK = {
   "banners": [
     {
       "id": "bn_1",
-      "title": "诚源酒庄 · 名酒专场",
+      "title": "本店 · 精选商品",
       "subtitle": "茅台飞天 53° 现货发售",
       "color": "#8B2E2E",
       "image": "",
@@ -304,8 +321,8 @@ const FALLBACK = {
     }
   ],
   "profile": {
-    "name": "永盛酒庄",
-    "tagline": "正品名酒 · 支持验货",
+    "name": "我的店铺",
+    "tagline": "正品保障 · 支持验货",
     "avatar": "",
     "wechat": "chengyuan-wine",
     "phone": "13900001111",
@@ -543,8 +560,7 @@ async function load() {
     DATA = JSON.parse(JSON.stringify(FALLBACK));
     toast('未读到线上数据，显示的是示例内容');
   }
-  if (DATA.profile && DATA.profile.name) document.title = DATA.profile.name;
-  renderAll();
+  if (DATA.profile && DATA.profile.name) document.title = DATA.profile.name;  renderAll();
 }
 
 /* ============ 工具 ============ */
