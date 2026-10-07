@@ -118,6 +118,7 @@
   .detail-bar { height: 46px; flex-shrink: 0; display: flex; align-items: center;
                 padding: 0 12px; background: #fff; border-bottom: 1px solid #EFEDE8; }
   .detail-bar .back { font-size: 22px; cursor: pointer; padding: 4px 10px 4px 2px; color: #2C2B29; line-height: 1; }
+  .detail-bar .close { margin-left: auto; font-size: 22px; line-height: 1; cursor: pointer; padding: 4px 10px; color: #2C2B29; }
   .detail-bar .dt { font-size: 15px; font-weight: 600; }
   .detail-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .d-img { width: 100%; height: 240px; background: #E7DEDC; display: flex;
@@ -237,6 +238,7 @@
       <div class="detail-bar">
         <span class="back" onclick="closeDetail()">‹</span>
         <span class="dt">商品详情</span>
+        <span class="close" onclick="closeDetail()">×</span>
       </div>
       <div class="detail-body">
         <div class="d-img" id="d-img"></div>
@@ -528,6 +530,7 @@ const FALLBACK = {
 let DATA = null;
 let activeCat = '';     // 空 = 全部
 let bannerIdx = 0, bannerTimer = null;
+let detailOpen = false;
 
 /* ============ 取数 ============ */
 async function load() {
@@ -652,7 +655,7 @@ function renderProducts() {
   let list = (DATA.products || []).filter(p => p.onSale !== false);
   if (activeCat) list = list.filter(p => p.categoryId === activeCat);
   if (kw) list = list.filter(p => (p.name || '').toLowerCase().indexOf(kw) > -1);
-  list.sort((a, b) => (a.sort||0) - (b.sort||0));
+  /* 按数组顺序展示（与后台管理顺序一致） */
 
   const grid = document.getElementById('grid');
   if (!list.length) { grid.innerHTML = '<div class="empty" style="width:100%">没有符合条件的商品</div>'; return; }
@@ -682,6 +685,7 @@ function renderProducts() {
 function openDetail(id) {
   const p = (DATA.products || []).find(x => x.id === id);
   if (!p) return;
+  if (!detailOpen) { detailOpen = true; history.pushState({ shopDetail: true }, ''); }
   const imgs = p.images || [];
   const first = imgs[0]
     ? '<img src="' + esc(imgs[0]) + '" alt=""/>'
@@ -709,7 +713,18 @@ function switchDetailImg(el, url) {
   const ch = document.querySelectorAll('.d-thumb');
   for (let i = 0; i < ch.length; i++) ch[i].classList.toggle('on', ch[i] === el);
 }
-function closeDetail() { document.getElementById('detail').classList.remove('show'); }
+function closeDetail() {
+  if (!detailOpen) return;
+  detailOpen = false;
+  document.getElementById('detail').classList.remove('show');
+  history.back();
+}
+window.addEventListener('popstate', function() {
+  if (detailOpen) {
+    detailOpen = false;
+    document.getElementById('detail').classList.remove('show');
+  }
+});
 
 /* ============ tab 切换 ============ */
 function switchTab(tab) {
