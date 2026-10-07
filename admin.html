@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>网页版后台 · 商品展示</title>
+<style>
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 28px 20px 80px; background: #F6F4F1; color: #2C2B29;
+         font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif; }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  .sub { color: #8B8378; font-size: 13px; margin-bottom: 24px; }
+  .sec { background: #fff; border-radius: 16px; padding: 22px 24px; margin-bottom: 18px;
+         box-shadow: 0 2px 10px rgba(0,0,0,.05); }
+  .sec > h2 { font-size: 16px; margin: 0 0 4px; }
+  .sec > .hint { font-size: 12px; color: #9A938A; margin-bottom: 16px; }
+  label { display: block; font-size: 12px; color: #6B675F; margin-bottom: 4px; }
+  input[type=text], input[type=number], select {
+    width: 100%; padding: 9px 11px; border: 1px solid #E3E0D9; border-radius: 9px;
+    font-size: 14px; background: #fff; color: #2C2B29; }
+  input:focus, select:focus { outline: none; border-color: #8B2E2E; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .field { margin-bottom: 12px; }
+  .row { display: flex; gap: 10px; align-items: flex-end; }
+  .row > .field { flex: 1; margin-bottom: 0; }
+
+  /* 列表项 */
+  .item { border: 1px solid #EFEDE8; border-radius: 12px; padding: 14px; margin-bottom: 12px; background: #FCFBFA; }
+  .item-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+  .item-idx { font-size: 12px; color: #B4B2A9; }
+  .del { background: none; border: none; color: #C0392B; font-size: 13px; cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+  .del:hover { background: #FDECEA; }
+  .mv { background: none; border: 1px solid #E3E0D9; border-radius: 6px; color: #6B675F;
+        cursor: pointer; padding: 3px 8px; font-size: 12px; }
+  .mv:hover { border-color: #8B2E2E; color: #8B2E2E; }
+  .acts { display: flex; gap: 6px; align-items: center; }
+  .chk-line { display: flex; align-items: center; gap: 6px; font-size: 13px; color: #6B675F; }
+  .chk-line input { width: 15px; height: 15px; accent-color: #8B2E2E; }
+
+  .add { width: 100%; border: 1px dashed #D8D4CD; background: #FCFBFA; color: #6B675F;
+         border-radius: 10px; padding: 11px; cursor: pointer; font-size: 13px; margin-top: 4px; }
+  .add:hover { border-color: #8B2E2E; color: #8B2E2E; background: #FDF7F7; }
+
+  /* 工具栏 */
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; background: #fff;
+         border-top: 1px solid #EFEDE8; padding: 12px 20px; display: flex; gap: 10px;
+         align-items: center; justify-content: center; box-shadow: 0 -2px 12px rgba(0,0,0,.06); }
+  .btn { border: none; border-radius: 999px; padding: 11px 26px; font-size: 14px; cursor: pointer; }
+  .btn-p { background: #8B2E2E; color: #fff; }
+  .btn-p:hover { background: #7A2626; }
+  .btn-s { background: #fff; color: #5F5E5A; border: 1px solid #D8D4CD; }
+  .btn-s:hover { border-color: #8B2E2E; color: #8B2E2E; }
+  .msg { font-size: 13px; min-width: 220px; }
+  .ok { color: #0F6E56; } .err { color: #C0392B; }
+
+  /* 码云配置 */
+  .cfg { background: #FDF9F3; }
+  .cfg input[type=password] { width: 100%; padding: 9px 11px; border: 1px solid #E3E0D9;
+         border-radius: 9px; font-size: 14px; }
+  details summary { cursor: pointer; font-size: 16px; font-weight: 600; padding: 2px 0; }
+  .tip { font-size: 12px; color: #8B8378; line-height: 1.85; margin-top: 10px; }
+  code { background: #EFEDE8; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+  .mode-tag { display:inline-block; font-size:11px; padding:2px 8px; border-radius:6px; margin-left:8px; vertical-align:middle; }
+  .mode-srv { background:#E8F3EC; color:#0F6E56; }
+  .mode-static { background:#FDEDE8; color:#B45309; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>网页版后台 <span id="mode-tag" class="mode-tag"></span></h1>
+  <div class="sub">改完点下方「保存」；要让顾客看到，在下面「发布到网上」推送到码云。<br/>
+  本页既能连本地服务器用，也能作为<b>静态网页直接部署到 Gitee Pages 等开源平台</b>上使用。</div>
+
+  <div class="sec">
+    <h2>店铺信息</h2>
+    <div class="hint">首页名片卡、联系页都读这里</div>
+    <div class="grid2">
+      <div class="field"><label>酒庄名称</label><input type="text" id="pf-name"/></div>
+      <div class="field"><label>简介 / 一句话</label><input type="text" id="pf-tagline"/></div>
+    </div>
+    <div class="field"><label>头像图片地址（留空显示名称首字）</label><input type="text" id="pf-avatar"/></div>
+    <div class="grid2">
+      <div class="field"><label>微信号</label><input type="text" id="pf-wechat"/></div>
+      <div class="field"><label>电话</label><input type="text" id="pf-phone"/></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>地址</label><input type="text" id="pf-address"/></div>
+      <div class="field"><label>营业时间</label><input type="text" id="pf-hours"/></div>
+    </div>
+    <div class="field"><label>首页公告（留空则不显示公告条）</label><input type="text" id="pf-notice"/></div>
+  </div>
+
+  <div class="sec">
+    <h2>顶部轮播图</h2>
+    <div class="hint">不放图片地址就是纯色背景配文字；至少留一张才会有首页横幅</div>
+    <div id="banner-list"></div>
+    <button class="add" onclick="addBanner()">+ 新增一张轮播图</button>
+  </div>
+
+  <div class="sec">
+    <h2>商品分类</h2>
+    <div class="hint">图标填一个表情符号即可，比如 🍶 🍷 🥃</div>
+    <div id="cat-list"></div>
+    <button class="add" onclick="addCat()">+ 新增分类</button>
+  </div>
+
+  <div class="sec">
+    <h2>商品</h2>
+    <div class="hint">四项必填：图片、分类、名称、价格。价格填 0 顾客看到「面议」</div>
+    <div id="prod-list"></div>
+    <button class="add" onclick="addProd()">+ 新增商品</button>
+  </div>
+
+  <div class="sec cfg">
+    <details>
+      <summary>发布到网上（让所有顾客看到）</summary>
+      <div class="tip">本地改只是改你电脑/浏览器里的文件。要让所有顾客看到，要把 <code>data.json</code> 发到网上。<br/>
+      支持 <b>GitHub Pages</b> 与 <b>Gitee 码云</b>：都免费、本页直接用浏览器把文件推送到你的仓库（两者接口都已确认允许跨域）。<br/>
+      选好平台、填好用户名 / 仓库名 / 令牌后，点「推送并发布」即可。</div>
+      <div class="field" style="margin-top:14px"><label>平台</label>
+        <select id="gy-platform">
+          <option value="github">GitHub Pages</option>
+          <option value="gitee">Gitee 码云</option>
+        </select>
+      </div>
+      <div class="grid2" style="margin-top:12px">
+        <div class="field"><label>用户名</label><input type="text" id="gy-owner" placeholder="GitHub / Gitee 用户名"/></div>
+        <div class="field"><label>仓库名</label><input type="text" id="gy-repo" placeholder="例如 shop-web"/></div>
+      </div>
+      <div class="field"><label>私人令牌</label><input type="password" id="gy-token" placeholder="GitHub: repo 权限 PAT；Gitee: 私人令牌"/></div>
+      <div class="row" style="margin-top:12px">
+        <button class="btn btn-p" onclick="push()">推送并发布</button>
+        <button class="btn btn-s" onclick="pullRemote()">从仓库拉取</button>
+        <button class="btn btn-s" onclick="download()">下载 data.json</button>
+      </div>
+      <div class="tip" id="gy-tip"></div>
+    </details>
+  </div>
+</div>
+
+<div class="bar">
+  <button class="btn btn-p" onclick="save()">保存</button>
+  <span class="msg" id="msg"></span>
+</div>
+
+<script>
+let D = null;
+let HAS_SERVER = false;
+
+/* ---------- 载入（相对路径，兼容本地服务器与静态平台） ---------- */
+fetch('./data.json?_t=' + Date.now())
+  .then(r => r.json())
+  .then(d => { D = d; renderAll(); probeServer(); })
+  .catch(() => msg('读不到数据文件（请确认与本页同目录有 data.json）', true));
+
+function probeServer() {
+  fetch('/api/data').then(r => { HAS_SERVER = r.ok; renderModeTag(); })
+    .catch(() => { HAS_SERVER = false; renderModeTag(); });
+}
+function renderModeTag() {
+  const e = document.getElementById('mode-tag');
+  if (HAS_SERVER) { e.textContent = '本地服务器模式'; e.className = 'mode-tag mode-srv'; }
+  else { e.textContent = '静态模式（直推仓库）'; e.className = 'mode-tag mode-static'; }
+}
+
+function renderAll() {
+  renderProfile(); renderBanners(); renderCats(); renderProds();
+  const o = localStorage.getItem('gy_owner'), r = localStorage.getItem('gy_repo');
+  if (o) document.getElementById('gy-owner').value = o;
+  if (r) document.getElementById('gy-repo').value = r;
+}
+
+function msg(t, bad) {
+  const e = document.getElementById('msg');
+  e.textContent = t; e.className = 'msg ' + (bad ? 'err' : 'ok');
+  setTimeout(() => { if (e.textContent === t) e.textContent = ''; }, 5000);
+}
+
+function esc(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+/* ---------- 店铺信息 ---------- */
+function renderProfile() {
+  const p = D.profile || (D.profile = {});
+  [['name','pf-name'],['tagline','pf-tagline'],['avatar','pf-avatar'],['wechat','pf-wechat'],
+   ['phone','pf-phone'],['address','pf-address'],['hours','pf-hours'],['notice','pf-notice']]
+  .forEach(([k, id]) => {
+    const el = document.getElementById(id);
+    el.value = p[k] || '';
+    el.oninput = e => { p[k] = e.target.value; };
+  });
+}
+
+/* ---------- 轮播图 ---------- */
+function renderBanners() {
+  const box = document.getElementById('banner-list');
+  box.innerHTML = (D.banners || []).map((b, i) => `
+    <div class="item">
+      <div class="item-top">
+        <span class="item-idx">第 ${i + 1} 张</span>
+        <span class="acts">
+          <button class="mv" onclick="mvBanner(${i},-1)">↑</button>
+          <button class="mv" onclick="mvBanner(${i},1)">↓</button>
+          <button class="del" onclick="delBanner(${i})">删除</button>
+        </span>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>主标题</label>
+          <input type="text" value="${esc(b.title)}" oninput="D.banners[${i}].title=this.value"/></div>
+        <div class="field"><label>副标题</label>
+          <input type="text" value="${esc(b.subtitle)}" oninput="D.banners[${i}].subtitle=this.value"/></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>轮播图片地址（可留空）</label>
+          <input type="text" value="${esc(b.image)}" oninput="D.banners[${i}].image=this.value"/></div>
+        <div class="field" style="max-width:110px"><label>背景色</label>
+          <input type="text" value="${esc(b.color)}" oninput="D.banners[${i}].color=this.value"/></div>
+        <label class="chk-line"><input type="checkbox" ${b.onSale ? 'checked' : ''}
+          onchange="D.banners[${i}].onSale=this.checked"/>上架</label>
+      </div>
+    </div>`).join('');
+}
+function addBanner() {
+  D.banners.push({ id: 'bn_' + Date.now(), title: '新轮播图', subtitle: '', color: '#8B2E2E', image: '', onSale: true, sort: D.banners.length + 1 });
+  renderBanners();
+}
+function delBanner(i) { D.banners.splice(i, 1); renderBanners(); }
+function mvBanner(i, d) {
+  const j = i + d; if (j < 0 || j >= D.banners.length) return;
+  const t = D.banners[i]; D.banners[i] = D.banners[j]; D.banners[j] = t;
+  D.banners.forEach((b, k) => b.sort = k + 1);
+  renderBanners();
+}
+
+/* ---------- 分类 ---------- */
+function renderCats() {
+  const box = document.getElementById('cat-list');
+  box.innerHTML = (D.categories || []).map((c, i) => `
+    <div class="item">
+      <div class="item-top">
+        <span class="item-idx">第 ${i + 1} 个</span>
+        <span class="acts">
+          <button class="mv" onclick="mvCat(${i},-1)">↑</button>
+          <button class="mv" onclick="mvCat(${i},1)">↓</button>
+          <button class="del" onclick="delCat(${i})">删除</button>
+        </span>
+      </div>
+      <div class="row">
+        <div class="field" style="max-width:88px"><label>图标</label>
+          <input type="text" value="${esc(c.icon)}" oninput="D.categories[${i}].icon=this.value"/></div>
+        <div class="field"><label>分类名称</label>
+          <input type="text" value="${esc(c.name)}" oninput="D.categories[${i}].name=this.value"/></div>
+        <label class="chk-line"><input type="checkbox" ${c.onSale ? 'checked' : ''}
+          onchange="D.categories[${i}].onSale=this.checked"/>上架</label>
+      </div>
+    </div>`).join('');
+}
+function addCat() {
+  D.categories.push({ id: 'cat_' + Date.now(), name: '新分类', icon: '🏷️', onSale: true, sort: D.categories.length + 1 });
+  renderCats();
+}
+function delCat(i) {
+  const id = D.categories[i].id;
+  if (!confirm('删除这个分类？原本属于它的商品会变成「未分类」。')) return;
+  D.categories.splice(i, 1);
+  D.products.forEach(p => { if (p.categoryId === id) p.categoryId = ''; });
+  renderCats(); renderProds();
+}
+function mvCat(i, d) {
+  const j = i + d; if (j < 0 || j >= D.categories.length) return;
+  const t = D.categories[i]; D.categories[i] = D.categories[j]; D.categories[j] = t;
+  D.categories.forEach((c, k) => c.sort = k + 1);
+  renderCats();
+}
+
+/* ---------- 商品 ---------- */
+function catOptions(sel) {
+  return (D.categories || []).map(c =>
+    `<option value="${esc(c.id)}" ${c.id === sel ? 'selected' : ''}>${esc(c.name)}</option>`).join('');
+}
+function renderProds() {
+  const box = document.getElementById('prod-list');
+  box.innerHTML = (D.products || []).map((p, i) => `
+    <div class="item">
+      <div class="item-top">
+        <span class="item-idx">第 ${i + 1} 件</span>
+        <span class="acts">
+          <button class="mv" onclick="mvProd(${i},-1)">↑</button>
+          <button class="mv" onclick="mvProd(${i},1)">↓</button>
+          <button class="del" onclick="delProd(${i})">删除</button>
+        </span>
+      </div>
+      <div class="field"><label>① 商品图片地址</label>
+        <input type="text" value="${esc((p.images || [])[0] || '')}" oninput="D.products[${i}].images=this.value?[this.value]:[]"/></div>
+      <div class="row">
+        <div class="field"><label>② 商品分类</label>
+          <select onchange="D.products[${i}].categoryId=this.value">${catOptions(p.categoryId)}</select></div>
+        <div class="field"><label>④ 价格（填 0 = 面议）</label>
+          <input type="number" min="0" value="${p.price || 0}" oninput="D.products[${i}].price=+this.value"/></div>
+        <div class="field" style="max-width:90px"><label>单位</label>
+          <input type="text" value="${esc(p.unit)}" oninput="D.products[${i}].unit=this.value"/></div>
+        <label class="chk-line"><input type="checkbox" ${p.onSale ? 'checked' : ''}
+          onchange="D.products[${i}].onSale=this.checked"/>上架</label>
+      </div>
+      <div class="field"><label>③ 商品名称</label>
+        <input type="text" value="${esc(p.name)}" oninput="D.products[${i}].name=this.value"/></div>
+      <div class="grid2">
+        <div class="field"><label>规格（可不填）</label>
+          <input type="text" value="${esc(p.spec)}" oninput="D.products[${i}].spec=this.value"/></div>
+        <div class="field"><label>标签（多个用逗号隔开）</label>
+          <input type="text" value="${esc((p.tags || []).join(','))}"
+            oninput="D.products[${i}].tags=this.value?this.value.split(',').map(s=>s.trim()).filter(Boolean):[]"/></div>
+      </div>
+      <div class="field"><label>介绍（可不填，换行用 | 隔开）</label>
+        <textarea rows="2" style="width:100%;padding:9px 11px;border:1px solid #E3E0D9;border-radius:9px;font:14px inherit;"
+          oninput="D.products[${i}].desc=this.value.replace(/\|/g,'\\n')">${esc((p.desc || '').replace(/\n/g, '|'))}</textarea></div>
+    </div>`).join('');
+}
+function addProd() {
+  D.products.push({
+    id: 'p_' + Date.now(), name: '新商品', categoryId: (D.categories[0] || {}).id || '',
+    price: 0, unit: '瓶', spec: '', desc: '', images: [], tags: [],
+    onSale: true, sort: D.products.length + 1
+  });
+  renderProds();
+}
+function delProd(i) {
+  if (!confirm('删除「' + D.products[i].name + '」？')) return;
+  D.products.splice(i, 1); renderProds();
+}
+function mvProd(i, d) {
+  const j = i + d; if (j < 0 || j >= D.products.length) return;
+  const t = D.products[i]; D.products[i] = D.products[j]; D.products[j] = t;
+  D.products.forEach((p, k) => p.sort = k + 1);
+  renderProds();
+}
+
+/* ---------- 保存（两种模式） ---------- */
+function save() {
+  if (HAS_SERVER) {
+    post('/api/save', D).then(d => msg(d.ok ? '已保存到本地服务器，刷新展示页即可看到' : '保存失败：' + d.error, !d.ok));
+    return;
+  }
+  // 静态模式：暂存到本机浏览器，等发布到码云才全网生效
+  try { localStorage.setItem('web_shop_draft', JSON.stringify(D)); } catch (e) {}
+  msg('已暂存在本机浏览器，点下面「推送到码云」让所有人看到');
+}
+
+/* ---------- 发布 / 拉取 / 下载（两种模式） ---------- */
+function push() {
+  const cfg = readCfg();
+  if (!cfg.ok) return msg(cfg.err, true);
+  localStorage.setItem('gy_owner', cfg.owner); localStorage.setItem('gy_repo', cfg.repo);
+  msg('正在推送…');
+  if (HAS_SERVER) {
+    post('/api/push-gitee', { owner: cfg.owner, repo: cfg.repo, token: cfg.token, data: D })
+      .then(showPushResult);
+  } else {
+    pushStatic(cfg).then(showPushResult);
+  }
+}
+function showPushResult(d) {
+  const tip = document.getElementById('gy-tip');
+  if (d.ok) {
+    msg('已推送并发布');
+    tip.innerHTML = '推送成功。展示页读取的就是这个仓库的 <code>data.json</code>，已自动更新（Pages 通常 1 分钟内生效）。';
+  } else { msg('推送失败：' + d.error, true); tip.textContent = d.error; }
+}
+
+function pullRemote() {
+  const cfg = readCfg();
+  if (!cfg.ok) return msg(cfg.err, true);
+  msg('正在拉取…');
+  if (HAS_SERVER) {
+    post('/api/pull-gitee', { owner: cfg.owner, repo: cfg.repo, token: cfg.token })
+      .then(d => { if (d.ok) { D = d.data; renderAll(); msg('已拉取，内容已刷新到本地'); } else msg('拉取失败：' + d.error, true); });
+  } else {
+    pullStatic(cfg).then(d => { if (d.ok) { D = d.data; renderAll(); msg('已拉取，内容已刷新'); } else msg('拉取失败：' + d.error, true); });
+  }
+}
+
+function download() {
+  if (HAS_SERVER) { location.href = '/api/download'; msg('已开始下载'); return; }
+  // 静态模式：浏览器直接下载当前数据
+  const blob = new Blob([JSON.stringify(D, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'data.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  msg('已开始下载 data.json');
+}
+
+/* ---------- 静态模式：浏览器直调 Gitee API（已确认其允许跨域） ---------- */
+function b64(str) { return btoa(unescape(encodeURIComponent(str))); }
+function ub64(b64str) { return decodeURIComponent(escape(atob(b64str))); }
+
+/* 静态模式：按平台路由（GitHub / Gitee 都支持浏览器直推） */
+async function pushStatic(cfg) {
+  return cfg.platform === 'github' ? pushGitHub(cfg) : pushGitee(cfg);
+}
+async function pullStatic(cfg) {
+  return cfg.platform === 'github' ? pullGitHub(cfg) : pullGitee(cfg);
+}
+
+/* ---- Gitee ---- */
+async function pushGitee(cfg) {
+  try {
+    const base = 'https://gitee.com/api/v5/repos/' + encodeURIComponent(cfg.owner) + '/' +
+                 encodeURIComponent(cfg.repo) + '/contents/data.json';
+    const getR = await fetch(base + '?access_token=' + encodeURIComponent(cfg.token));
+    const getJ = await getR.json();
+    const sha = (getR.ok && getJ && getJ.sha) ? getJ.sha : '';
+    const payload = {
+      access_token: cfg.token,
+      content: b64(JSON.stringify(D, null, 2)),
+      message: '更新网页版数据 ' + new Date().toLocaleString('zh-CN')
+    };
+    if (sha) payload.sha = sha;
+    const putR = await fetch(base, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json;charset=UTF-8' },
+      body: JSON.stringify(payload)
+    });
+    const putJ = await putR.json();
+    if (putR.status === 200 || putR.status === 201) return { ok: true };
+    return { ok: false, error: (putJ && (putJ.message || putJ.error)) || ('HTTP ' + putR.status) };
+  } catch (e) { return { ok: false, error: e.message || String(e) }; }
+}
+async function pullGitee(cfg) {
+  try {
+    const base = 'https://gitee.com/api/v5/repos/' + encodeURIComponent(cfg.owner) + '/' +
+                 encodeURIComponent(cfg.repo) + '/contents/data.json?access_token=' + encodeURIComponent(cfg.token);
+    const r = await fetch(base);
+    const j = await r.json();
+    if (r.status !== 200 || !j.content) return { ok: false, error: (j && j.message) || ('HTTP ' + r.status) };
+    return { ok: true, data: JSON.parse(ub64(j.content)) };
+  } catch (e) { return { ok: false, error: e.message || String(e) }; }
+}
+
+/* ---- GitHub ---- */
+async function pushGitHub(cfg) {
+  try {
+    const base = 'https://api.github.com/repos/' + encodeURIComponent(cfg.owner) + '/' +
+                 encodeURIComponent(cfg.repo) + '/contents/data.json';
+    const h = { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json' };
+    let sha = '';
+    try {
+      const g = await fetch(base, { headers: h });
+      if (g.ok) { const j = await g.json(); sha = j.sha || ''; }
+    } catch (e) {}
+    const payload = {
+      message: '更新网页版数据 ' + new Date().toLocaleString('zh-CN'),
+      content: b64(JSON.stringify(D, null, 2))
+    };
+    if (sha) payload.sha = sha;
+    const r = await fetch(base, {
+      method: 'PUT',
+      headers: Object.assign({ 'Content-Type': 'application/json;charset=UTF-8' }, h),
+      body: JSON.stringify(payload)
+    });
+    const j = await r.json();
+    if (r.status === 200 || r.status === 201) return { ok: true };
+    return { ok: false, error: (j && j.message) || ('HTTP ' + r.status) };
+  } catch (e) { return { ok: false, error: e.message || String(e) }; }
+}
+async function pullGitHub(cfg) {
+  try {
+    const base = 'https://api.github.com/repos/' + encodeURIComponent(cfg.owner) + '/' +
+                 encodeURIComponent(cfg.repo) + '/contents/data.json';
+    const h = { 'Authorization': 'Bearer ' + cfg.token, 'Accept': 'application/vnd.github+json' };
+    const r = await fetch(base, { headers: h });
+    const j = await r.json();
+    if (r.status !== 200 || !j.content) return { ok: false, error: (j && j.message) || ('HTTP ' + r.status) };
+    return { ok: true, data: JSON.parse(ub64(j.content.replace(/\s/g, ''))) };
+  } catch (e) { return { ok: false, error: e.message || String(e) }; }
+}
+
+/* ---------- 通用 ---------- */
+function readCfg() {
+  const platform = document.getElementById('gy-platform').value;
+  const owner = document.getElementById('gy-owner').value.trim();
+  const repo = document.getElementById('gy-repo').value.trim();
+  const token = document.getElementById('gy-token').value.trim();
+  if (!owner || !repo) return { ok: false, err: '请填用户名和仓库名' };
+  if (!token) return { ok: false, err: '请填私人令牌' };
+  return { ok: true, platform, owner, repo, token };
+}
+function post(url, body) {
+  return fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(r => r.json());
+}
+</script>
+</body>
+</html>
