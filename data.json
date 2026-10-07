@@ -1,0 +1,254 @@
+{
+  "version": 2,
+  "banners": [
+    {
+      "id": "bn_1",
+      "title": "诚源酒庄 · 名酒专场",
+      "subtitle": "茅台飞天 53° 现货发售",
+      "color": "#8B2E2E",
+      "image": "",
+      "onSale": true,
+      "sort": 1
+    },
+    {
+      "id": "bn_2",
+      "title": "节庆礼盒 · 提前订享优惠",
+      "subtitle": "五粮液 · 国窖 组合装",
+      "color": "#B45309",
+      "image": "",
+      "onSale": true,
+      "sort": 2
+    },
+    {
+      "id": "bn_3",
+      "title": "进口红酒专区",
+      "subtitle": "法国波尔多 · 智利中央山谷",
+      "color": "#0F6E56",
+      "image": "",
+      "onSale": true,
+      "sort": 3
+    }
+  ],
+  "profile": {
+    "name": "永盛酒庄",
+    "tagline": "正品名酒 · 支持验货",
+    "avatar": "",
+    "wechat": "chengyuan-wine",
+    "phone": "13900001111",
+    "address": "XX 市 XX 区中山路 88 号",
+    "hours": "09:00 - 21:30",
+    "notice": "城区内满 500 元免费送货"
+  },
+  "categories": [
+    {
+      "id": "cat_baijiu",
+      "name": "白酒",
+      "icon": "🍶",
+      "onSale": true,
+      "sort": 1
+    },
+    {
+      "id": "cat_hongjiu",
+      "name": "红酒",
+      "icon": "🍷",
+      "onSale": true,
+      "sort": 2
+    },
+    {
+      "id": "cat_yangjiu",
+      "name": "洋酒",
+      "icon": "🥃",
+      "onSale": true,
+      "sort": 3
+    },
+    {
+      "id": "cat_pijiu",
+      "name": "啤酒",
+      "icon": "🍺",
+      "onSale": true,
+      "sort": 4
+    },
+    {
+      "id": "cat_lipin",
+      "name": "礼盒",
+      "icon": "🎁",
+      "onSale": true,
+      "sort": 5
+    }
+  ],
+  "products": [
+    {
+      "id": "p_1",
+      "name": "贵州茅台 飞天 53°",
+      "categoryId": "cat_baijiu",
+      "price": 2680,
+      "unit": "瓶",
+      "spec": "500ml · 酱香型",
+      "desc": "茅台酒经典之作，酱香突出、优雅细腻。\n支持验货，假一赔十。",
+      "images": [],
+      "tags": [
+        "热销",
+        "正品保障"
+      ],
+      "onSale": true,
+      "sort": 1
+    },
+    {
+      "id": "p_2",
+      "name": "五粮液 第八代普五",
+      "categoryId": "cat_baijiu",
+      "price": 1099,
+      "unit": "瓶",
+      "spec": "500ml · 浓香型",
+      "desc": "五粮液核心大单品，浓香典范。",
+      "images": [],
+      "tags": [
+        "热销"
+      ],
+      "onSale": true,
+      "sort": 2
+    },
+    {
+      "id": "p_3",
+      "name": "国窖 1573",
+      "categoryId": "cat_baijiu",
+      "price": 980,
+      "unit": "瓶",
+      "spec": "500ml · 浓香型",
+      "desc": "源自 1573 国宝窖池群，陈香优雅。",
+      "images": [],
+      "tags": [],
+      "onSale": true,
+      "sort": 3
+    },
+    {
+      "id": "p_4",
+      "name": "拉菲传奇 波尔多红",
+      "categoryId": "cat_hongjiu",
+      "price": 168,
+      "unit": "瓶",
+      "spec": "750ml · 法国 AOC",
+      "desc": "果香浓郁，单宁柔顺，佐餐佳品。",
+      "images": [],
+      "tags": [
+        "进口"
+      ],
+      "onSale": true,
+      "sort": 4
+    },
+    {
+      "id": "p_5",
+      "name": "奔富 BIN 389",
+      "categoryId": "cat_hongjiu",
+      "price": 468,
+      "unit": "瓶",
+      "spec": "750ml · 澳大利亚",
+      "desc": "赤霞珠与西拉混酿，人称“小葛兰许”。",
+      "images": [],
+      "tags": [
+        "进口"
+      ],
+      "onSale": true,
+      "sort": 5
+    },
+    {
+      "id": "p_6",
+      "name": "轩尼诗 VSOP",
+      "categoryId": "cat_yangjiu",
+      "price": 458,
+      "unit": "瓶",
+      "spec": "700ml · 干邑白兰地",
+      "desc": "口感和谐圆润，适合纯饮或加冰。",
+      "images": [],
+      "tags": [],
+      "onSale": true,
+      "sort": 6
+    },
+    {
+      "id": "p_7",
+      "name": "麦卡伦 12 年雪莉桶",
+      "categoryId": "cat_yangjiu",
+      "price": 0,
+      "unit": "瓶",
+      "spec": "700ml · 单一麦芽威士忌",
+      "desc": "雪莉桶熟成，干果与香料风味。\n价格随行情波动，详询店家。",
+      "images": [],
+      "tags": [
+        "稀缺"
+      ],
+      "onSale": true,
+      "sort": 7
+    },
+    {
+      "id": "p_8",
+      "name": "青岛啤酒经典 1903",
+      "categoryId": "cat_pijiu",
+      "price": 96,
+      "unit": "箱",
+      "spec": "500ml × 12 罐",
+      "desc": "经典口味，整箱更划算。",
+      "images": [],
+      "tags": [],
+      "onSale": true,
+      "sort": 8
+    },
+    {
+      "id": "p_9",
+      "name": "双支红酒礼盒",
+      "categoryId": "cat_lipin",
+      "price": 299,
+      "unit": "盒",
+      "spec": "750ml × 2 · 含礼袋",
+      "desc": "波尔多 AOC 双支装，配礼盒礼袋，送礼体面。",
+      "images": [],
+      "tags": [
+        "送礼"
+      ],
+      "onSale": true,
+      "sort": 9
+    },
+    {
+      "id": "p_10",
+      "name": "茅台王子酒（下架示例）",
+      "categoryId": "cat_baijiu",
+      "price": 328,
+      "unit": "瓶",
+      "spec": "500ml · 酱香型",
+      "desc": "此商品演示「下架」状态：用户端不可见，管理端可重新上架。",
+      "images": [],
+      "tags": [],
+      "onSale": false,
+      "sort": 10
+    },
+    {
+      "id": "p_1791353400072",
+      "name": "剑南春 水晶剑",
+      "categoryId": "cat_baijiu",
+      "price": 428,
+      "unit": "瓶",
+      "spec": "500ml · 浓香型",
+      "desc": "",
+      "images": [
+        "https://img.example.com/jnc.jpg"
+      ],
+      "tags": [
+        "热销"
+      ],
+      "onSale": true,
+      "sort": 11
+    },
+    {
+      "id": "p_1791353400073",
+      "name": "人头马 XO",
+      "categoryId": "cat_yangjiu",
+      "price": 0,
+      "unit": "瓶",
+      "spec": "700ml · 干邑",
+      "desc": "价格随行情浮动\n详询店家",
+      "images": [],
+      "tags": [],
+      "onSale": true,
+      "sort": 13
+    }
+  ]
+}
