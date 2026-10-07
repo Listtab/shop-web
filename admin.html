@@ -16,10 +16,12 @@
   .sec > h2 { font-size: 16px; margin: 0 0 4px; }
   .sec > .hint { font-size: 12px; color: #9A938A; margin-bottom: 16px; }
   label { display: block; font-size: 12px; color: #6B675F; margin-bottom: 4px; }
-  input[type=text], input[type=number], select {
-    width: 100%; padding: 9px 11px; border: 1px solid #E3E0D9; border-radius: 9px;
-    font-size: 14px; background: #fff; color: #2C2B29; }
-  input:focus, select:focus { outline: none; border-color: #8B2E2E; }
+  input[type=text], input[type=number], input[type=password], select, textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid #E3E0D9; border-radius: 9px;
+    font-size: 16px; font-family: inherit; line-height: 1.5;
+    background: #fff; color: #2C2B29; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: #8B2E2E; }
+  textarea { resize: vertical; min-height: 66px; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
   .field { margin-bottom: 12px; }
@@ -58,8 +60,8 @@
 
   /* 码云配置 */
   .cfg { background: #FDF9F3; }
-  .cfg input[type=password] { width: 100%; padding: 9px 11px; border: 1px solid #E3E0D9;
-         border-radius: 9px; font-size: 14px; }
+  .cfg input[type=password] { width: 100%; padding: 10px 12px; border: 1px solid #E3E0D9;
+         border-radius: 9px; font-size: 16px; }
   details summary { cursor: pointer; font-size: 16px; font-weight: 600; padding: 2px 0; }
   .tip { font-size: 12px; color: #8B8378; line-height: 1.85; margin-top: 10px; }
   code { background: #EFEDE8; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
@@ -126,15 +128,44 @@
   @media (min-width: 1000px) {
     #manage-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
   }
+
+  /* 三张图：手机竖排，电脑并排三列 */
+  .imgslots { display: grid; grid-template-columns: 1fr; gap: 8px; }
+  @media (min-width: 860px) {
+    .imgslots { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  /* 电脑端：表单标签与输入更宽松 */
+  @media (min-width: 1000px) {
+    .panel-body { padding: 20px 24px; }
+    .prodcard .pc-body { padding: 16px; }
+  }
+
+  /* ===== 管理密码锁 ===== */
+  .lock { position: fixed; inset: 0; background: #F6F4F1; z-index: 200; display: flex;
+          align-items: center; justify-content: center; padding: 20px; }
+  .lock.hidden { display: none; }
+  .lock-box { background: #fff; border-radius: 16px; padding: 26px 24px; width: 100%; max-width: 360px;
+              box-shadow: 0 10px 40px rgba(0,0,0,.12); }
+  .lock-box h2 { margin: 0 0 6px; font-size: 18px; }
+  .lock-box .tip { margin: 0 0 16px; }
+  .lock-box .btn { width: 100%; margin-top: 10px; }
+  .lock-err { color: #C0392B; font-size: 13px; min-height: 20px; margin-top: 8px; }
+  .lock-tools { display: flex; gap: 8px; justify-content: center; margin-top: 14px;
+                flex-wrap: wrap; }
+  .lock-tools button { background: none; border: none; color: #8B8378; font-size: 12px;
+                       cursor: pointer; text-decoration: underline; }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>网页版后台 <span id="mode-tag" class="mode-tag"></span></h1>
+  <h1>网页版后台 <span id="mode-tag" class="mode-tag"></span>
+    <button class="btn btn-s mini" style="float:right;margin-left:8px" onclick="lockNow()">🔒 锁定</button>
+  </h1>
   <div class="sub">改完在下面「发布到网上」推送到 GitHub / COS，顾客就能看到。<br/>
   本页既能连本地服务器用，也能作为<b>静态网页直接部署</b>到 GitHub Pages / 腾讯云 COS 上使用。</div>
 
-  <div class="panel" id="p-profile">
+  <div class="panel collapsed" id="p-profile">
     <div class="panel-head" onclick="tog('p-profile')">
       <span class="panel-title">🏪 店铺信息</span>
       <span class="panel-sum" id="s-profile"></span>
@@ -143,7 +174,7 @@
     <div class="panel-body">
       <div class="hint">首页名片卡、联系页都读这里</div>
     <div class="grid2">
-      <div class="field"><label>酒庄名称</label><input type="text" id="pf-name"/></div>
+      <div class="field"><label>店铺名称</label><input type="text" id="pf-name"/></div>
       <div class="field"><label>简介 / 一句话</label><input type="text" id="pf-tagline"/></div>
     </div>
     <div class="field"><label>头像图片地址（留空显示名称首字）</label><input type="text" id="pf-avatar"/></div>
@@ -171,7 +202,7 @@
     </div>
   </div>
 
-  <div class="panel" id="p-prod">
+  <div class="panel collapsed" id="p-prod">
     <div class="panel-head" onclick="tog('p-prod')">
       <span class="panel-title">🍷 商品管理（按分类）</span>
       <span class="panel-sum" id="s-prod"></span>
@@ -227,15 +258,81 @@
 
 <div id="toast" class="toast"></div>
 
+<!-- 管理密码锁 -->
+<div class="lock" id="lock">
+  <div class="lock-box">
+    <h2 id="lock-title">后台管理</h2>
+    <div class="tip" id="lock-tip">请输入管理密码</div>
+    <input type="password" id="lock-pw" placeholder="管理密码" onkeydown="if(event.key==='Enter')tryUnlock()"/>
+    <div class="lock-err" id="lock-err"></div>
+    <button class="btn btn-p" onclick="tryUnlock()">进入后台</button>
+    <div class="lock-tools">
+      <button onclick="setPwPrompt()">设置 / 修改密码</button>
+    </div>
+  </div>
+</div>
+
 <script>
 let D = null;
 let HAS_SERVER = false;
 
+/* ---------- 管理密码锁（仅本机浏览器保存，明文不落页面） ---------- */
+const PW_KEY = 'shop_admin_pw';
+function lockNow() {
+  sessionStorage.removeItem('shop_admin_ok');
+  document.getElementById('lock').classList.remove('hidden');
+  document.getElementById('lock-pw').value = '';
+  document.getElementById('lock-err').textContent = '';
+}
+function tryUnlock() {
+  const input = document.getElementById('lock-pw');
+  const err = document.getElementById('lock-err');
+  const pw = input.value;
+  if (!pw) { err.textContent = '请输入密码'; return; }
+  const saved = localStorage.getItem(PW_KEY) || '';
+  if (!saved) {
+    localStorage.setItem(PW_KEY, pw);          // 首次使用：把这次输入的密码存下来
+  } else if (saved !== pw) {
+    err.textContent = '密码不对，请重试';
+    input.value = '';
+    return;
+  }
+  sessionStorage.setItem('shop_admin_ok', '1');
+  document.getElementById('lock').classList.add('hidden');
+  input.value = '';
+  err.textContent = '';
+  boot();
+}
+function setPwPrompt() {
+  const cur = localStorage.getItem(PW_KEY);
+  if (cur) {
+    const ask = prompt('当前已设置密码。要修改请先输入旧密码：');
+    if (ask !== cur) { alert('旧密码不对，未修改。'); return; }
+  }
+  const n = prompt('设置新的管理密码（下次进入后台用它）：');
+  if (!n) return;
+  localStorage.setItem(PW_KEY, n);
+  sessionStorage.setItem('shop_admin_ok', '1');
+  document.getElementById('lock').classList.add('hidden');
+  alert('密码已设置 / 修改成功。');
+}
+
 /* ---------- 载入（相对路径，兼容本地服务器与静态平台） ---------- */
-fetch('./data.json?_t=' + Date.now())
-  .then(r => r.json())
-  .then(d => { D = d; renderAll(); probeServer(); })
-  .catch(() => msg('读不到数据文件（请确认与本页同目录有 data.json）', true));
+function boot() {
+  if (sessionStorage.getItem('shop_admin_ok') === '1') {
+    document.getElementById('lock').classList.add('hidden');
+  } else {
+    document.getElementById('lock').classList.remove('hidden');
+    document.getElementById('lock-tip').textContent =
+      localStorage.getItem(PW_KEY) ? '请输入管理密码' : '首次使用：请设置一个管理密码';
+    return;
+  }
+  fetch('./data.json?_t=' + Date.now())
+    .then(r => r.json())
+    .then(d => { D = d; renderAll(); probeServer(); })
+    .catch(() => msg('读不到数据文件（请确认与本页同目录有 data.json）', true));
+}
+boot();
 
 function probeServer() {
   fetch('/api/data').then(r => { HAS_SERVER = r.ok; renderModeTag(); })
@@ -249,12 +346,27 @@ function renderModeTag() {
 
 function renderAll() {
   renderProfile(); renderBanners(); renderManage();
-  const o = localStorage.getItem('gy_owner'), r = localStorage.getItem('gy_repo');
-  if (o) document.getElementById('gy-owner').value = o;
-  if (r) document.getElementById('gy-repo').value = r;
+  loadCosCfgInputs();
   loadCosCfgInputs();
   onPlatformChange();
+  loadGhCfg();
   updSums();
+}
+
+/* ---------- 记住 GitHub 配置（用户名/仓库/令牌自动填充） ---------- */
+const GH_DEFAULT = { owner: 'Listtab', repo: 'shop-web' };
+function loadGhCfg() {
+  const o = localStorage.getItem('gy_owner') || GH_DEFAULT.owner;
+  const r = localStorage.getItem('gy_repo') || GH_DEFAULT.repo;
+  const t = localStorage.getItem('gy_token') || '';
+  document.getElementById('gy-owner').value = o;
+  document.getElementById('gy-repo').value = r;
+  document.getElementById('gy-token').value = t;
+}
+function saveGhCfg() {
+  localStorage.setItem('gy_owner', document.getElementById('gy-owner').value.trim());
+  localStorage.setItem('gy_repo', document.getElementById('gy-repo').value.trim());
+  localStorage.setItem('gy_token', document.getElementById('gy-token').value.trim());
 }
 
 /* ---------- 小标题折叠面板 ---------- */
@@ -479,7 +591,7 @@ function productCardHtml(gi) {
           </span>
         </div>
         <div class="hint" style="margin-bottom:8px">商品图片（最多 3 张，第 1 张为封面；可「选图上传」直传 GitHub，或粘贴图片网址）</div>
-        ${slots}
+        <div class="imgslots">${slots}</div>
         <div class="row">
           <div class="field"><label>商品分类</label>
             <select onchange="D.products[${gi}].categoryId=this.value;renderManage()">${catOptions(p.categoryId)}</select></div>
@@ -498,8 +610,7 @@ function productCardHtml(gi) {
             <input type="text" value="${esc((p.tags || []).join(','))}" oninput="D.products[${gi}].tags=this.value?this.value.split(',').map(s=>s.trim()).filter(Boolean):[]"/></div>
         </div>
         <div class="field"><label>介绍（可不填，换行用 | 隔开）</label>
-          <textarea rows="2" style="width:100%;padding:9px 11px;border:1px solid #E3E0D9;border-radius:9px;font:14px inherit;"
-            oninput="D.products[${gi}].desc=this.value.replace(/\|/g,'\\n')">${esc((p.desc || '').replace(/\n/g, '|'))}</textarea></div>
+          <textarea rows="2" oninput="D.products[${gi}].desc=this.value.replace(/\|/g,'\\n')">${esc((p.desc || '').replace(/\n/g, '|'))}</textarea></div>
       </div>
     </div>`;
 }
@@ -654,7 +765,7 @@ function push() {
   } else {
     cfg = readCfg();
     if (!cfg.ok) return msg(cfg.err, true);
-    localStorage.setItem('gy_owner', cfg.owner); localStorage.setItem('gy_repo', cfg.repo);
+    saveGhCfg();
   }
   msg('正在推送…');
   if (HAS_SERVER) {
@@ -685,6 +796,7 @@ function pullRemote() {
   } else {
     cfg = readCfg();
     if (!cfg.ok) return msg(cfg.err, true);
+    saveGhCfg();
   }
   msg('正在拉取…');
   if (HAS_SERVER) {
